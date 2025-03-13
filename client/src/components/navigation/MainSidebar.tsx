@@ -45,46 +45,38 @@ const MainSidebar: React.FC<MainSidebarProps> = ({ isVisible, toggleSidebar }) =
       <nav className="flex-1 mt-4 overflow-y-auto">
         <ul>
           <li className="mb-2">
-            <Link href="/inbox">
-              <a className={`flex items-center px-4 py-3 ${isActive('/inbox') 
-                ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
-                : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
-                <Home className="text-xl lg:mr-3" />
-                <span className="hidden lg:block">Inbox</span>
-              </a>
+            <Link href="/inbox" className={`flex items-center px-4 py-3 ${isActive('/inbox') 
+              ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
+              <Home className="text-xl lg:mr-3" />
+              <span className="hidden lg:block">Inbox</span>
             </Link>
           </li>
           
           <li className="mb-2">
-            <Link href="/contacts">
-              <a className={`flex items-center px-4 py-3 ${isActive('/contacts') 
-                ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
-                : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
-                <Users className="text-xl lg:mr-3" />
-                <span className="hidden lg:block">Contacts</span>
-              </a>
+            <Link href="/contacts" className={`flex items-center px-4 py-3 ${isActive('/contacts') 
+              ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
+              <Users className="text-xl lg:mr-3" />
+              <span className="hidden lg:block">Contacts</span>
             </Link>
           </li>
           
           <li className="mb-2">
-            <Link href="/visitors">
-              <a className={`flex items-center px-4 py-3 ${isActive('/visitors') 
-                ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
-                : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
-                <MapPin className="text-xl lg:mr-3" />
-                <span className="hidden lg:block">Visitors</span>
-              </a>
+            <Link href="/visitors" className={`flex items-center px-4 py-3 ${isActive('/visitors') 
+              ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
+              <MapPin className="text-xl lg:mr-3" />
+              <span className="hidden lg:block">Visitors</span>
             </Link>
           </li>
           
           <li className="mb-2">
-            <Link href="/settings">
-              <a className={`flex items-center px-4 py-3 ${isActive('/settings') 
-                ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
-                : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
-                <Settings className="text-xl lg:mr-3" />
-                <span className="hidden lg:block">Settings</span>
-              </a>
+            <Link href="/settings" className={`flex items-center px-4 py-3 ${isActive('/settings') 
+              ? 'text-white bg-gray-700 border-l-4 border-indigo-500' 
+              : 'text-gray-300 hover:bg-gray-700 hover:text-white'}`}>
+              <Settings className="text-xl lg:mr-3" />
+              <span className="hidden lg:block">Settings</span>
             </Link>
           </li>
         </ul>

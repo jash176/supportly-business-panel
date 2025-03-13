@@ -36,11 +36,13 @@ const Settings: React.FC = () => {
 
   return (
     <div className="flex flex-1 flex-col md:flex-row overflow-hidden h-full">
-      <div className={`${mobileView === 'sidebar' ? 'block' : 'hidden'} md:block`}>
+      {/* Settings sidebar - always visible on desktop, conditionally on mobile */}
+      <div className={`${mobileView === 'sidebar' ? 'block' : 'hidden'} md:block md:w-64 md:flex-none`}>
         <SettingsSidebar />
       </div>
       
-      <div className={`${mobileView === 'content' ? 'block' : 'hidden'} md:block flex-1 relative`}>
+      {/* Settings content - always visible on desktop, conditionally on mobile */}
+      <div className={`${mobileView === 'content' ? 'block' : 'hidden md:block'} flex-1 relative`}>
         {/* Mobile back button */}
         <button 
           onClick={handleBackToSidebar}

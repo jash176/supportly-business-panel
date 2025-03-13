@@ -39,6 +39,7 @@ const Inbox: React.FC = () => {
   
   return (
     <div className="flex flex-1 flex-col md:flex-row overflow-hidden h-full">
+      {/* Chat list panel - always visible on desktop, conditionally on mobile */}
       <div className={`${mobileView === 'list' ? 'block' : 'hidden'} md:block md:flex-none md:w-80`}>
         <ChatsPanel 
           chats={chats}
@@ -47,7 +48,8 @@ const Inbox: React.FC = () => {
         />
       </div>
       
-      <div className={`${mobileView === 'chat' ? 'flex' : 'hidden'} md:flex flex-1 flex-col relative`}>
+      {/* Chat main panel - always visible on desktop, conditionally on mobile */}
+      <div className={`${mobileView === 'chat' ? 'flex' : 'hidden md:flex'} flex-1 flex-col relative`}>
         {/* Mobile back button */}
         <button 
           onClick={handleBackToList}
