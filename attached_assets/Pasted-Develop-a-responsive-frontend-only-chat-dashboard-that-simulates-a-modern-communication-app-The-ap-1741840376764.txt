@@ -1,0 +1,105 @@
+Develop a responsive, frontend-only chat dashboard that simulates a modern communication app. The application will consist of multiple pages with nested sidebar navigation and a main content area. Use Next’s to build a modular, component-based UI that meets the following specifications.
+
+Global Layout
+Main Sidebar (Navigation)
+Position: Persistent vertical sidebar (typically on the left).
+Items:
+Inbox
+Contacts
+Visitors
+Settings
+Search
+Behavior:
+Each item should be clickable and update the main content area with the corresponding page.
+Apply clear active and hover states for enhanced UX.
+Consider using icons along with labels for clarity.
+Page Details
+1. Inbox Page
+Structure:
+Left Sidebar (Chats List)
+Display a list of user chats.
+Each chat item should include:
+User's name or avatar.
+A preview of the last message.
+Timestamp of the last interaction.
+Make items clickable to select a conversation.
+Main Chat Component
+Display the conversation with the selected user.
+Include a chat history view showing messages, timestamps, and possibly sender identifiers.
+Incorporate a text input area at the bottom for composing new messages.
+Right Sidebar (Chat Details)
+Show detailed information for the selected chat user:
+Name
+Email
+Location (city/region)
+Last Seen/Last Activity Time
+Country Flag: Display a small flag icon representing the user's country.
+This section can use cards or a list format to neatly present the details.
+2. Contacts Page
+Layout:
+Use a table layout to display a list of contacts.
+Table Columns:
+Full Name
+Email
+Location
+Segments (categorization/grouping)
+Last Active (timestamp)
+Score (Ratings): Visual representation (e.g., stars, numerical score).
+Additional Features:
+Consider interactive elements such as sorting, filtering, or pagination.
+Ensure the table is responsive and maintains readability on smaller screens.
+3. Visitors Page
+Components:
+Left Sidebar (Active Users)
+Display a list of currently active visitors.
+Items may include:
+User names or avatars.
+Status indicators (e.g., online/offline).
+Main Area (Map Component)
+Integrate a map using a library (e.g., Google Maps, Leaflet, or Mapbox).
+Place markers on the map representing the geographic location of each active user.
+Allow markers to be interactive (e.g., clicking a marker shows additional user info).
+4. Settings Page
+Sidebar with Dropdown Sections:
+Primary Categories:
+Account Settings
+Workspace Settings
+Account Settings Section:
+Nested inner sections include:
+Account Information
+Availability
+Notifications
+Security
+Interface
+Implement each section as either an expandable accordion or separate navigation items that load into the main area.
+Workspace Settings Section:
+Nested inner sections include:
+Workspace Information
+Agents & Teams
+Danger Zone
+The Danger Zone might be highlighted with different styling to denote caution (e.g., red accent colors).
+General Requirements & Considerations
+Responsiveness & Accessibility:
+
+Ensure the layout is fully responsive across desktop, tablet, and mobile devices.
+Use ARIA labels, proper HTML semantics, and keyboard navigability for accessibility.
+Design Consistency:
+
+Maintain a consistent color scheme, typography, and spacing throughout the application.
+Use a modern, clean design with clear visual hierarchy.
+Component Reusability:
+
+structure your app with reusable components for sidebars, tables, chat components, and maps.
+Modularize your CSS (consider using CSS modules or styled-components) to keep styles scoped and maintainable.
+Interactivity & User Experience:
+
+Add smooth animations/transitions for sidebar toggles and page transitions.
+Use hover effects and active states to guide the user.
+Mock Data Integration:
+
+Populate the chat, contacts, and visitors pages with mock data to simulate real usage.
+For the map, create sample markers based on the visitor's mock location data.
+Optional Enhancements:
+
+Implement search functionality in the main sidebar or as a dedicated page.
+Integrate notifications or real-time updates if you later decide to add interactivity beyond static UI.
