@@ -26,6 +26,14 @@ function Router() {
         <Route path="/contacts" component={Contacts} />
         <Route path="/visitors" component={Visitors} />
         <Route path="/settings" component={Settings} />
+        {/* Settings sub-routes */}
+        <Route path="/settings/availability" component={Settings} />
+        <Route path="/settings/notifications" component={Settings} />
+        <Route path="/settings/security" component={Settings} />
+        <Route path="/settings/interface" component={Settings} />
+        <Route path="/settings/workspace" component={Settings} />
+        <Route path="/settings/teams" component={Settings} />
+        <Route path="/settings/danger" component={Settings} />
         <Route component={NotFound} />
       </Switch>
     </MainLayout>
