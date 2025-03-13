@@ -9,10 +9,12 @@ import { formatRelative } from 'date-fns';
 
 interface DetailsPanelProps {
   activeChat: Chat | null;
+  isVisible: boolean;
+  togglePanel: () => void;
 }
 
-const DetailsPanel: React.FC<DetailsPanelProps> = ({ activeChat }) => {
-  const [isVisible, setIsVisible] = useState(false);
+const DetailsPanel: React.FC<DetailsPanelProps> = ({ activeChat, isVisible, togglePanel }) => {
+ 
 
   if (!activeChat) {
     return null;
@@ -20,22 +22,17 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ activeChat }) => {
   
   const { person } = activeChat;
 
-  // Toggle panel visibility on mobile
-  const togglePanel = () => {
-    setIsVisible(!isVisible);
-  };
-
   return (
     <>
       {/* Mobile show button */}
-      <div className="lg:hidden fixed bottom-4 right-4 z-10">
+      {/* <div className="lg:hidden fixed bottom-4 right-4 z-10">
         <Button 
           onClick={togglePanel}
           className="rounded-full bg-indigo-600 text-white shadow-lg p-3 h-12 w-12"
         >
           <UserPlus className="h-5 w-5" />
         </Button>
-      </div>
+      </div> */}
 
       {/* Panel content */}
       <div className={`
@@ -60,9 +57,9 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ activeChat }) => {
             <AvatarFallback className="text-lg">{person.name.charAt(0)}</AvatarFallback>
           </Avatar>
           <h3 className="font-semibold text-lg text-gray-900">{person.name}</h3>
-          <p className="text-sm text-gray-500">{person.role}</p>
+          {/* <p className="text-sm text-gray-500">{person.role}</p> */}
           
-          <div className="flex justify-center mt-4 space-x-2">
+          {/* <div className="flex justify-center mt-4 space-x-2">
             <Button 
               variant="outline" 
               size="icon" 
@@ -84,7 +81,7 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({ activeChat }) => {
             >
               <Video className="h-5 w-5" />
             </Button>
-          </div>
+          </div> */}
         </div>
         
         <div className="p-6 overflow-y-auto">

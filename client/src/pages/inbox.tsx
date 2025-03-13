@@ -1,23 +1,36 @@
 import { useState } from 'react';
-import ChatsList from '@/components/inbox/ChatsList';
-import ChatWindow from '@/components/inbox/ChatWindow';
-import ChatDetails from '@/components/inbox/ChatDetails';
+import ChatsPanel from '@/components/pages/inbox/ChatsPanel';
+import ChatPanel from '@/components/pages/inbox/ChatPanel';
+import DetailsPanel from '@/components/pages/inbox/DetailsPanel';
+import MobileAppDownload from '@/components/MobileAppDownload';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { chats } from '@/data/mockData';
 
-const InboxPage = () => {
-  const [selectedChatId, setSelectedChatId] = useState('1'); // Default to first chat
+const Inbox: React.FC = () => {
+  const [activeChat, setActiveChat] = useState(chats[0]);
+  const [isVisible, setIsVisible] = useState(false);
+  const isMobile = useIsMobile();
+
+  // Toggle panel visibility on mobile
+  const togglePanel = () => {
+    setIsVisible(!isVisible);
+  };
+  
+  if (isMobile && location.pathname !== '/settings') {
+    return <MobileAppDownload />;
+  }
   
   return (
-    <div className="h-full flex">
-      <ChatsList 
-        selectedChatId={selectedChatId} 
-        onChatSelect={setSelectedChatId} 
+    <div className="flex flex-1 flex-col md:flex-row overflow-hidden h-full">
+      <ChatsPanel 
+        chats={chats}
+        activeChat={activeChat}
+        onChatSelect={setActiveChat}
       />
-      
-      <ChatWindow selectedChatId={selectedChatId} />
-      
-      <ChatDetails selectedChatId={selectedChatId} />
+      <ChatPanel activeChat={activeChat} onUserDetailsClick={togglePanel} />
+      <DetailsPanel activeChat={activeChat} isVisible={isVisible} togglePanel={togglePanel} />
     </div>
   );
 };
 
-export default InboxPage;
+export default Inbox;

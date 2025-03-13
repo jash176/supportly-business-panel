@@ -1,27 +1,44 @@
-import { useState } from 'react';
-import VisitorsList from '@/components/visitors/VisitorsList';
-import MapComponent from '@/components/visitors/MapComponent';
-import VisitorStats from '@/components/visitors/VisitorStats';
+import { useState, useEffect } from 'react';
+import VisitorsPanel from '@/components/pages/visitors/VisitorsPanel';
+import MapPanel from '@/components/pages/visitors/MapPanel';
+import MobileAppDownload from '@/components/MobileAppDownload';
+import { visitors } from '@/data/mockData';
 
-const VisitorsPage = () => {
-  const [selectedVisitorId, setSelectedVisitorId] = useState<string | null>(null);
+const Visitors: React.FC = () => {
+  const [activeVisitor, setActiveVisitor] = useState(visitors[0]);
+  const [isMobile, setIsMobile] = useState(false);
+  
+  useEffect(() => {
+    const checkIsMobile = () => {
+      setIsMobile(window.innerWidth < 768);
+    };
+    
+    checkIsMobile();
+    window.addEventListener('resize', checkIsMobile);
+    
+    return () => {
+      window.removeEventListener('resize', checkIsMobile);
+    };
+  }, []);
+  
+  if (isMobile && location.pathname !== '/settings') {
+    return <MobileAppDownload />;
+  }
   
   return (
-    <div className="h-full flex">
-      <VisitorsList 
-        selectedVisitorId={selectedVisitorId}
-        onVisitorSelect={setSelectedVisitorId}
+    <div className="flex flex-1 flex-col md:flex-row overflow-hidden h-full">
+      <VisitorsPanel 
+        visitors={visitors}
+        activeVisitor={activeVisitor}
+        onVisitorSelect={setActiveVisitor}
       />
-      
-      <div className="flex-grow flex flex-col">
-        <MapComponent 
-          selectedVisitorId={selectedVisitorId}
-          onVisitorSelect={setSelectedVisitorId}
-        />
-        <VisitorStats />
-      </div>
+      <MapPanel 
+        visitors={visitors}
+        activeVisitor={activeVisitor}
+        onVisitorSelect={setActiveVisitor}
+      />
     </div>
   );
 };
 
-export default VisitorsPage;
+export default Visitors;
