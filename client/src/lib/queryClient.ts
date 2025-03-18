@@ -1,4 +1,5 @@
 import { QueryClient, QueryFunction } from "@tanstack/react-query";
+import { config } from "@/config";
 
 // Add token management
 let authToken: string | null = null;
@@ -16,25 +17,34 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+function getFullUrl(path: string): string {
+  const baseUrl = config.apiBaseUrl;
+  return `${baseUrl}${path.startsWith("/") ? path : `/${path}`}`;
+}
+
 export async function apiRequest(
   method: string,
   url: string,
-  data?: unknown | undefined,
+  data?: any,
   headers?: Record<string, string>
 ): Promise<Response> {
   let newHeaders = headers;
-  if(!newHeaders) newHeaders = {}
+  if (!newHeaders) newHeaders = {};
   if (authToken) {
     newHeaders["Authorization"] = `Bearer ${authToken}`;
   }
-  const res = await fetch(url, {
+  newHeaders["Content-Type"] = "application/json";
+
+  const fullUrl = getFullUrl(url);
+
+  const res = await fetch(fullUrl, {
     method,
     headers: newHeaders,
     body: data ? JSON.stringify(data) : undefined,
-    credentials: "include",
+    // credentials: "include",
   });
 
-  await throwIfResNotOk(res);
+  // await throwIfResNotOk(res);
   return res;
 }
 
@@ -44,12 +54,17 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const headers: Record<string, string> = {};
-    
+    const headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
     if (authToken) {
       headers["Authorization"] = `Bearer ${authToken}`;
     }
-    const res = await fetch(queryKey[0] as string, {
+
+    const fullUrl = getFullUrl(queryKey[0] as string);
+
+    const res = await fetch(fullUrl, {
       headers,
       credentials: "include",
     });

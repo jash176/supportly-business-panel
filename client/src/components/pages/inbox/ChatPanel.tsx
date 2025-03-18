@@ -1,39 +1,64 @@
 import { useState, useEffect, useRef } from "react";
 import {
-  Phone,
-  Video,
-  MoreVertical,
   Smile,
-  Paperclip,
   Send,
   UserPlus,
   MoreHorizontal,
   Type,
   ChevronDown,
   ChevronUp,
+  Share,
+  Mic,
 } from "lucide-react";
-import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
-import { Chat, Message } from "@/data/mockData";
 import { Textarea } from "@/components/ui/textarea";
 import { formatRelative } from "date-fns";
+// import {
+//   DropdownMenu,
+//   DropdownMenuContent,
+//   DropdownMenuItem,
+//   DropdownMenuTrigger,
+// } from "@radix-ui/react-dropdown-menu";
+import { useMediaQuery } from "@/hooks/use-media";
+import { Chat } from "@/lib/api/inbox";
+import { useMessages } from "@/hooks/useMessages";
+import { Loader2 } from "lucide-react";
+import { Message } from "@/lib/api/messages";
+import { MessageContent } from "./MessageContent";
+import { FileUpload } from "@/components/FileUpload";
+import { AudioRecorder } from "@/components/AudioRecorder";
+import { FilePreview } from "@/components/FilePreview";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
-} from "@radix-ui/react-dropdown-menu";
-import { useMediaQuery } from "@/hooks/use-media";
+} from "@/components/ui/dropdown-menu";
 
 interface ChatPanelProps {
   activeChat: Chat | null;
   onUserDetailsClick: () => void;
 }
 
-const ChatPanel: React.FC<ChatPanelProps> = ({
-  activeChat,
-  onUserDetailsClick,
-}) => {
+const getInitials = (name: string) => {
+  return name
+    .split(" ")
+    .map((word) => word[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+};
+
+const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
+  const {
+    data: messages,
+    isLoading,
+    error,
+  } = useMessages({
+    sessionId: activeChat?.sid ?? "",
+  });
+
   const [newMessage, setNewMessage] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
 
@@ -55,25 +80,291 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
   const visibleButtonsArray = allButtons.slice(0, visibleButtons);
   const hiddenButtonsArray = allButtons.slice(visibleButtons);
 
+  const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
+  const [selectedFile, setSelectedFile] = useState<File | Blob | null>(null);
+
+  console.log("Selected File : ", selectedFile);
+
   // Scroll to bottom of messages whenever messages change
   useEffect(() => {
-    messageEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  }, [activeChat?.messages]);
+    messageEndRef.current?.scrollIntoView({ behavior: "instant" });
+  }, [messages]);
 
-  const handleSendMessage = () => {
+  const handleSendMessage = (
+    content: string,
+    type: "text" | "image" | "audio",
+    mediaUrl: string
+  ) => {
     if (!newMessage.trim()) return;
 
-    // In a real app, this would send the message to an API
-    console.log("Sending message:", newMessage);
+    const body = {
+      id: Date.now().toString(),
+      sender: "business",
+      content: type === "text" ? content : mediaUrl,
+      contentType: type,
+      status: "sending", // Add status field
+    };
+
+    try {
+    } catch (error) {}
 
     // Clear the input after sending
     setNewMessage("");
   };
 
+  const handleFileSelect = async (file: File) => {
+    setSelectedFile(file);
+    setIsMoreMenuOpen(false);
+  };
+
+  const handleAudioRecording = async (blob: Blob) => {
+    try {
+      const formData = new FormData();
+      formData.append("audio", blob, "recording.webm");
+      formData.append("sessionId", activeChat?.sid ?? "");
+
+      // Add your audio upload API call here
+      console.log("Uploading audio recording");
+
+      // Close dropdown after upload
+      setIsMoreMenuOpen(false);
+    } catch (error) {
+      console.error("Error uploading audio:", error);
+    }
+  };
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="flex-1 flex flex-col bg-gray-50 items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-gray-400" />
+        <p className="mt-4 text-sm text-gray-500">Loading conversation...</p>
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="flex-1 flex flex-col bg-gray-50 items-center justify-center">
+        <p className="text-destructive text-lg">Failed to load messages</p>
+        <p className="text-sm text-muted-foreground mt-2">
+          {error instanceof Error ? error.message : "Please try again later"}
+        </p>
+      </div>
+    );
+  }
+
+  // Show empty state when no active chat
+  if (!activeChat) {
+    return (
+      <div className="flex-1 flex flex flex-col bg-gray-50 items-center justify-center p-4">
+        <div className="text-center max-w-md">
+          <h3 className="text-xl font-semibold text-gray-700 mb-2">
+            No conversation selected
+          </h3>
+          <p className="text-gray-500">
+            Select a conversation from the list to start chatting with your
+            customers
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Show empty conversation state
+  if (!messages?.data || messages.data.length === 0) {
+    return (
+      <div className="flex-1 flex flex-col bg-gray-50">
+        {/* Keep the header */}
+        <div className="p-4 border-b border-gray-200 bg-white">
+          <div className="flex items-center">
+            <div className="relative">
+              <Avatar className="w-10 h-10">
+                <AvatarImage src="" alt={activeChat.name} />
+                <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                  {getInitials(activeChat.name)}
+                </AvatarFallback>
+              </Avatar>
+            </div>
+            <div className="ml-3">
+              <h3 className="font-semibold text-gray-900">{activeChat.name}</h3>
+              <p className="text-xs text-gray-500">
+                {/* {activeChat.person.isOnline ? "Online" : "Offline"} • Last active{" "} */}
+                {formatRelative(
+                  new Date(activeChat.lastMessageTime),
+                  new Date()
+                )}
+              </p>
+            </div>
+            <div className="ml-auto flex">
+              <div className="lg:hidden">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  aria-label="More Options"
+                  // onClick={onUserDetailsClick}
+                >
+                  <UserPlus className="w-5 h-5" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex-1 flex items-center justify-center">
+          <div className="text-center max-w-md p-4">
+            <h3 className="text-xl font-semibold text-gray-700 mb-2">
+              Start the conversation
+            </h3>
+            <p className="text-gray-500 mb-4">
+              No messages in this conversation yet. Send a message to get
+              started.
+            </p>
+          </div>
+        </div>
+
+        {/* Keep the message input */}
+        <div className="m-4 border border-gray-700 rounded-lg bg-white p-2 overflow-hidden">
+          {selectedFile && (
+            <div className="mb-2">
+              <FilePreview
+                file={selectedFile}
+                onRemove={() => setSelectedFile(null)}
+                onSend={() => {}}
+              />
+            </div>
+          )}
+          <div className="flex items-center gap-1 mb-2 border-b border-gray-800 pb-1">
+            {visibleButtonsArray.map((button) => (
+              <Button
+                key={button.name}
+                variant="ghost"
+                size="sm"
+                className="text-[#495462] text-xs rounded font-semibold"
+                onClick={button.onClick}
+              >
+                {button.name}
+              </Button>
+            ))}
+
+            {hiddenButtonsArray.length > 0 && (
+              <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="text-gray-400 text-xs font-normal rounded ml-auto"
+                  >
+                    {dropdownOpen ? (
+                      <ChevronUp className="h-4 w-4" />
+                    ) : (
+                      <ChevronDown className="h-4 w-4" />
+                    )}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {hiddenButtonsArray.map((button) => (
+                    <DropdownMenuItem
+                      key={button.name}
+                      onClick={button.onClick}
+                      className="text-xs"
+                    >
+                      {button.name}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
+            <div className="ml-auto">
+              <Button
+                variant="ghost"
+                size="sm"
+                className="text-gray-400 text-xs font-normal rounded flex items-center gap-1"
+              >
+                MagicReply
+                <ChevronDown className="h-3 w-3 ml-1" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="flex items-center">
+            <Textarea
+              placeholder="Send your message to Shiv in email..."
+              className="flex-1 bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0 resize-none p-0 text-black placeholder:text-gray-500 min-h-0"
+              value={newMessage}
+              onChange={(e) => setNewMessage(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  handleSendMessage();
+                }
+              }}
+            />
+
+            <div className="flex items-center gap-1 ml-auto">
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 h-8 w-8"
+              >
+                <Type className="h-5 w-5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-gray-400 h-8 w-8"
+              >
+                <Smile className="h-5 w-5" />
+              </Button>
+              <DropdownMenu
+                open={isMoreMenuOpen}
+                onOpenChange={setIsMoreMenuOpen}
+              >
+                <DropdownMenuTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-gray-400 h-8 w-8"
+                  >
+                    <MoreHorizontal className="h-5 w-5" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent
+                  align="end"
+                  className="w-56 bg-white border p-1"
+                >
+                  <DropdownMenuItem className="p-0">
+                    <FileUpload onFileSelect={handleFileSelect} />
+                  </DropdownMenuItem>
+                  <DropdownMenuItem className="p-0">
+                    <AudioRecorder
+                      onCancel={() => setIsMoreMenuOpen(false)}
+                      onRecordingComplete={handleAudioRecording}
+                    />
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button
+                className="bg-blue-600 hover:bg-blue-700 ml-1 h-8 w-8 p-0"
+                aria-label="Send message"
+                onClick={handleSendMessage}
+                disabled={!newMessage.trim()}
+              >
+                <Send className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   // Group messages by date
   const groupedMessages: { [date: string]: Message[] } = {};
 
-  activeChat?.messages.forEach((message) => {
+  messages.data.forEach((message) => {
     const date = new Date(message.timestamp).toDateString();
     if (!groupedMessages[date]) {
       groupedMessages[date] = [];
@@ -81,66 +372,31 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
     groupedMessages[date].push(message);
   });
 
-  if (!activeChat) {
-    return (
-      <div className="flex-1 flex flex-col bg-gray-50 items-center justify-center">
-        <div className="text-center p-8">
-          <h3 className="text-xl font-semibold text-gray-700 mb-2">
-            No conversation selected
-          </h3>
-          <p className="text-gray-500">
-            Choose a conversation from the list to start chatting
-          </p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
       <div className="p-4 border-b border-gray-200 bg-white">
         <div className="flex items-center">
           <div className="relative">
             <Avatar className="w-10 h-10">
-              <AvatarImage
-                src={activeChat.person.avatar}
-                alt={activeChat.person.name}
-              />
-              <AvatarFallback>
-                {activeChat.person.name.charAt(0)}
+              <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                {getInitials(activeChat.name)}
               </AvatarFallback>
             </Avatar>
-            <span
-              className={`absolute bottom-0 right-0 w-2.5 h-2.5 ${
-                activeChat.person.isOnline ? "bg-green-500" : "bg-gray-300"
-              } border-2 border-white rounded-full`}
-            ></span>
           </div>
           <div className="ml-3">
-            <h3 className="font-semibold text-gray-900">
-              {activeChat.person.name}
-            </h3>
+            <h3 className="font-semibold text-gray-900">{activeChat.name}</h3>
             <p className="text-xs text-gray-500">
-              {activeChat.person.isOnline ? "Online" : "Offline"} • Last active{" "}
-              {formatRelative(
-                new Date(activeChat.person.lastActive),
-                new Date()
-              )}
+              Last message{" "}
+              {formatRelative(new Date(activeChat.lastMessageTime), new Date())}
             </p>
           </div>
           <div className="ml-auto flex">
-            {/* <Button variant="ghost" size="icon" aria-label="Phone Call">
-              <Phone className="w-5 h-5" />
-            </Button> */}
-            {/* <Button variant="ghost" size="icon" aria-label="Video Call">
-              <Video className="w-5 h-5" />
-            </Button> */}
             <div className="lg:hidden">
               <Button
                 variant="ghost"
                 size="icon"
                 aria-label="More Options"
-                onClick={onUserDetailsClick}
+                // onClick={onUserDetailsClick}
               >
                 <UserPlus className="w-5 h-5" />
               </Button>
@@ -163,51 +419,66 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
               </div>
 
               {/* Messages */}
-              {messages.map((message) => (
-                <div
-                  key={message.id}
-                  className={`flex items-end ${
-                    message.isSender ? "justify-end" : ""
-                  } my-7`}
-                >
-                  {!message.isSender && (
-                    <Avatar className="w-8 h-8 mr-2">
-                      <AvatarImage
-                        src={activeChat.person.avatar}
-                        alt={activeChat.person.name}
-                      />
-                      <AvatarFallback>
-                        {activeChat.person.name.charAt(0)}
-                      </AvatarFallback>
-                    </Avatar>
-                  )}
+              {messages.map((message) => {
+                const isSender = message.sender === "business";
+                if (message.contentType === "email_prompt") return null;
+                return (
                   <div
-                    className={`max-w-[75%] w-fit rounded-lg p-3 shadow-sm ${
-                      message.isSender
-                        ? "bg-indigo-500 text-white"
-                        : "bg-white text-gray-800"
-                    }`}
+                    key={message.id}
+                    className={`flex items-end ${
+                      isSender ? "justify-end" : ""
+                    } my-7`}
                   >
-                    <p>{message.text}</p>
-                    <span
-                      className={`text-xs mt-1 block ${
-                        message.isSender ? "text-gray-200" : "text-gray-500"
+                    {!isSender && (
+                      <Avatar className="w-8 h-8 mr-2">
+                        <AvatarImage src="" alt={activeChat.name} />
+                        <AvatarFallback className="bg-indigo-100 text-indigo-600 text-sm">
+                          {getInitials(activeChat.name)}
+                        </AvatarFallback>
+                      </Avatar>
+                    )}
+                    <div
+                      className={`max-w-[75%] w-fit rounded-lg p-3 shadow-sm ${
+                        isSender
+                          ? "bg-indigo-500 text-white"
+                          : "bg-white text-gray-800"
                       }`}
                     >
-                      {new Date(message.timestamp).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
-                    </span>
+                      <MessageContent
+                        contentType={message.contentType}
+                        content={message.content}
+                        className={isSender ? "text-white" : "text-gray-800"}
+                      />
+                      <span
+                        className={`text-xs mt-1 block ${
+                          isSender ? "text-gray-200" : "text-gray-500"
+                        }`}
+                      >
+                        {new Date(message.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           ))}
           <div ref={messageEndRef} />
         </div>
       </div>
       <div className="m-4 border border-gray-700 rounded-lg bg-white p-2 overflow-hidden">
+        {selectedFile && (
+          <div className="mb-2">
+            <FilePreview
+              file={selectedFile}
+              fileName="Audio Recording.webm"
+              onRemove={() => setSelectedFile(null)}
+              onSend={() => handleSendMessage(true)}
+            />
+          </div>
+        )}
         <div className="flex items-center gap-1 mb-2 border-b border-gray-800 pb-1">
           {visibleButtonsArray.map((button) => (
             <Button
@@ -291,13 +562,39 @@ const ChatPanel: React.FC<ChatPanelProps> = ({
             >
               <Smile className="h-5 w-5" />
             </Button>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 h-8 w-8"
+            <DropdownMenu
+              open={isMoreMenuOpen}
+              onOpenChange={setIsMoreMenuOpen}
             >
-              <MoreHorizontal className="h-5 w-5" />
-            </Button>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="text-gray-400 h-8 w-8"
+                >
+                  <MoreHorizontal className="h-5 w-5" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent
+                align="end"
+                className="w-56 bg-white border p-1"
+              >
+                <DropdownMenuItem className="flex items-center cursor-pointer py-2 px-3 gap-2">
+                  <FileUpload onFileSelect={handleFileSelect} />
+                </DropdownMenuItem>
+                <DropdownMenuItem className="flex items-center gap-2 cursor-pointer py-2 px-3">
+                  <AudioRecorder
+                    onRecordingComplete={(blob) => {
+                      setSelectedFile(blob);
+                      console.log("Audio ready:", URL.createObjectURL(blob));
+                    }}
+                    onCancel={() => {
+                      console.log("Recording cancelled.");
+                    }}
+                  />
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
             <Button
               className="bg-blue-600 hover:bg-blue-700 ml-1 h-8 w-8 p-0"
               aria-label="Send message"

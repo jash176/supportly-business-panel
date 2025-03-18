@@ -1,27 +1,51 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from "react";
 import { Switch, Route, useLocation } from "wouter";
 import { queryClient } from "./lib/queryClient";
 import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layouts/Main";
-import Inbox from "@/pages/Inbox";
-import Contacts from "@/pages/Contacts";
-import Visitors from "@/pages/Visitors";
-import Settings from "@/pages/Settings";
+import Inbox from "@/pages/inbox";
+import Contacts from "@/pages/contacts";
+import Visitors from "@/pages/visitors";
+import Settings from "@/pages/settings";
+import Login from "./pages/login";
+import { AuthProvider } from "@/context/auth";
+import { ProtectedRoute } from "@/components/ProtectedRoute";
+import Signup from "./pages/signup";
+import CreateWorkspace from "./pages/create-worspace";
 
-function Router() {
+function PublicRoutes() {
+  return (
+    <Switch>
+      <Route path="/login" component={Login} />
+      <Route path="/signup" component={Signup} />
+      <Route path="/create-workspace">
+        <ProtectedRoute>
+          <CreateWorkspace />
+        </ProtectedRoute>
+      </Route>
+      <Route>
+        <ProtectedRoute>
+          <PrivateRoutes />
+        </ProtectedRoute>
+      </Route>
+    </Switch>
+  );
+}
+
+function PrivateRoutes() {
   const [location] = useLocation();
-  
+
   useEffect(() => {
-    // Update active status in sidebar when route changes
-    document.title = `ChatDash - ${location.substring(1) || 'Inbox'}`;
+    document.title = `ChatDash - ${location.substring(1) || "Inbox"}`;
   }, [location]);
 
   return (
     <MainLayout>
       <Switch>
         <Route path="/" component={Inbox} />
+        <Route path="/create-workspace" component={CreateWorkspace} />
         <Route path="/inbox" component={Inbox} />
         <Route path="/contacts" component={Contacts} />
         <Route path="/visitors" component={Visitors} />
@@ -43,8 +67,10 @@ function Router() {
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
-      <Router />
-      <Toaster />
+      <AuthProvider>
+        <PublicRoutes />
+        <Toaster />
+      </AuthProvider>
     </QueryClientProvider>
   );
 }
