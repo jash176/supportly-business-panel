@@ -35,4 +35,12 @@ export const messagesApi = {
     );
     return response.json();
   },
+  sendMessage: async (data: FormData): Promise<MessagesResponse> => {
+    const response = await apiRequest(
+      "POST",
+      "/messages-service/send-message",
+      data,
+    )
+    return response.json();
+  }
 };

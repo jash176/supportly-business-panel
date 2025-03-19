@@ -6,7 +6,7 @@ interface FilePreviewProps {
   file: File | Blob;
   fileName?: string;
   onRemove: () => void;
-  onSend: () => void; // Add this prop
+  onSend: (e :"image" | "audio") => void; // Add this prop
 }
 
 export function FilePreview({
@@ -88,7 +88,7 @@ export function FilePreview({
         </p>
       </div>
 
-      <Button variant="default" size="sm" className="h-8 px-3" onClick={onSend}>
+      <Button variant="default" size="sm" className="h-8 px-3" onClick={() => onSend(isImage ? "image" : "audio")}>
         Send
       </Button>
 

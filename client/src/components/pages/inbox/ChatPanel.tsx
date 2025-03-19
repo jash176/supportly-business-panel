@@ -7,19 +7,11 @@ import {
   Type,
   ChevronDown,
   ChevronUp,
-  Share,
-  Mic,
 } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { formatRelative } from "date-fns";
-// import {
-//   DropdownMenu,
-//   DropdownMenuContent,
-//   DropdownMenuItem,
-//   DropdownMenuTrigger,
-// } from "@radix-ui/react-dropdown-menu";
 import { useMediaQuery } from "@/hooks/use-media";
 import { Chat } from "@/lib/api/inbox";
 import { useMessages } from "@/hooks/useMessages";
@@ -35,6 +27,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useSendMessage } from "@/hooks/useSendMessage";
+import { useAuth } from "@/context/auth";
 
 interface ChatPanelProps {
   activeChat: Chat | null;
@@ -51,6 +45,7 @@ const getInitials = (name: string) => {
 };
 
 const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
+  const {user} = useAuth()
   const {
     data: messages,
     isLoading,
@@ -58,6 +53,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
   } = useMessages({
     sessionId: activeChat?.sid ?? "",
   });
+  const {mutateAsync: sendMessage} = useSendMessage()
 
   const [newMessage, setNewMessage] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -90,26 +86,48 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
     messageEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
 
-  const handleSendMessage = (
+  const handleSendMessage = async (
     content: string,
     type: "text" | "image" | "audio",
-    mediaUrl: string
+    mediaUrl?: Blob | File
   ) => {
-    if (!newMessage.trim()) return;
-
-    const body = {
-      id: Date.now().toString(),
-      sender: "business",
-      content: type === "text" ? content : mediaUrl,
-      contentType: type,
-      status: "sending", // Add status field
-    };
-
+    if (!user || !activeChat) return;
+    if (type === "text" && !content.trim()) return;
+  
+    const formData = new FormData();
+    
+    // Add required fields
+    formData.append("businessId", user.businessId.toString());
+    formData.append("sessionId", activeChat.sid);
+    formData.append("sender", "business");
+    formData.append("contentType", type);
+    
+    // Add optional fields
+    if (activeChat.customerEmail) {
+      formData.append("customerEmail", activeChat.customerEmail);
+    }
+  
+    // Add content based on type
+    if (type === "text") {
+      formData.append("content", content);
+    } else if (type === "image") {
+      if (!mediaUrl) return;
+      formData.append("file", mediaUrl);
+    }else if (type === "audio") {
+      if (!mediaUrl) return;
+      formData.append("file", mediaUrl, "audio.webm");
+    }
     try {
-    } catch (error) {}
-
-    // Clear the input after sending
-    setNewMessage("");
+      const response = await sendMessage(formData);
+      if (response.success) {
+        // Clear inputs after successful send
+        setNewMessage("");
+        setSelectedFile(null);
+      }
+    } catch (error) {
+      // console.error("Error sending message:", error);
+      // Handle error (show toast notification, etc.)
+    }
   };
 
   const handleFileSelect = async (file: File) => {
@@ -158,7 +176,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
   // Show empty state when no active chat
   if (!activeChat) {
     return (
-      <div className="flex-1 flex flex flex-col bg-gray-50 items-center justify-center p-4">
+      <div className="flex-1 flex flex-col bg-gray-50 items-center justify-center p-4">
         <div className="text-center max-w-md">
           <h3 className="text-xl font-semibold text-gray-700 mb-2">
             No conversation selected
@@ -231,7 +249,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
               <FilePreview
                 file={selectedFile}
                 onRemove={() => setSelectedFile(null)}
-                onSend={() => {}}
+                onSend={(type) => handleSendMessage("", type, selectedFile)}
               />
             </div>
           )}
@@ -298,7 +316,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
               onKeyDown={(e) => {
                 if (e.key === "Enter" && !e.shiftKey) {
                   e.preventDefault();
-                  handleSendMessage();
+                  handleSendMessage(newMessage, "text");
                 }
               }}
             />
@@ -349,7 +367,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
               <Button
                 className="bg-blue-600 hover:bg-blue-700 ml-1 h-8 w-8 p-0"
                 aria-label="Send message"
-                onClick={handleSendMessage}
+                onClick={() => handleSendMessage(newMessage, "text")}
                 disabled={!newMessage.trim()}
               >
                 <Send className="h-4 w-4" />
@@ -371,7 +389,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
     }
     groupedMessages[date].push(message);
   });
-
+  console.log("groupedMessages : ", groupedMessages)
   return (
     <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
       <div className="p-4 border-b border-gray-200 bg-white">
@@ -421,6 +439,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
               {/* Messages */}
               {messages.map((message) => {
                 const isSender = message.sender === "business";
+                const isCustomer = message.sender === "customer";
                 if (message.contentType === "email_prompt") return null;
                 return (
                   <div
@@ -439,9 +458,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
                     )}
                     <div
                       className={`max-w-[75%] w-fit rounded-lg p-3 shadow-sm ${
-                        isSender
+                        isSender && message.contentType === "text"
                           ? "bg-indigo-500 text-white"
-                          : "bg-white text-gray-800"
+                          : isCustomer && message.contentType === "text" ? "bg-white text-gray-800" : ""
                       }`}
                     >
                       <MessageContent
@@ -475,7 +494,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
               file={selectedFile}
               fileName="Audio Recording.webm"
               onRemove={() => setSelectedFile(null)}
-              onSend={() => handleSendMessage(true)}
+              onSend={(type) => handleSendMessage("", type, selectedFile)}
             />
           </div>
         )}
@@ -542,7 +561,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
             onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                handleSendMessage();
+                handleSendMessage(newMessage, "text");
               }
             }}
           />
@@ -598,7 +617,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
             <Button
               className="bg-blue-600 hover:bg-blue-700 ml-1 h-8 w-8 p-0"
               aria-label="Send message"
-              onClick={handleSendMessage}
+              onClick={() => handleSendMessage(newMessage, "text")}
               disabled={!newMessage.trim()}
             >
               <Send className="h-4 w-4" />
