@@ -51,9 +51,10 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
     isLoading,
     error,
   } = useMessages({
-    sessionId: activeChat?.sid ?? "",
+    sid: activeChat?.sid ?? "",
+    sessionId: activeChat?.sessionId.toString() ?? ""
   });
-  const {mutateAsync: sendMessage} = useSendMessage()
+  const {mutateAsync: sendMessage} = useSendMessage(activeChat?.sessionId.toString() ?? "")
 
   const [newMessage, setNewMessage] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
