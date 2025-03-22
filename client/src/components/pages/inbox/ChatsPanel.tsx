@@ -63,15 +63,22 @@ const ChatsPanel: React.FC<ChatsPanelProps> = ({
                 ></span> */}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="flex justify-between">
+                <div className="flex justify-between items-center">
                   <h3 className="font-semibold text-gray-900 truncate">
                     {chat.name}
                   </h3>
+                  <div className="flex items-center space-x-2">
+                  {chat.unreadMessages > 0 && (
+                      <span className="inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-white bg-blue-600 rounded-full">
+                        {chat.unreadMessages}
+                      </span>
+                    )}
                   <span className="text-xs text-gray-500">
                     {formatDistanceToNow(new Date(chat.lastMessageTime), {
                       addSuffix: false,
                     })}
                   </span>
+                  </div>
                 </div>
                 <p className="text-sm text-gray-600 truncate">
                   {chat.lastMessage}

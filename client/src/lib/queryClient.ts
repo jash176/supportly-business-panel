@@ -33,14 +33,16 @@ export async function apiRequest(
   if (authToken) {
     newHeaders["Authorization"] = `Bearer ${authToken}`;
   }
-  newHeaders["Content-Type"] = "application/json";
+  if(data instanceof FormData === false) {
+    newHeaders["Content-Type"] = "application/json";
+  }
 
   const fullUrl = getFullUrl(url);
 
   const res = await fetch(fullUrl, {
     method,
     headers: newHeaders,
-    body: data ? JSON.stringify(data) : undefined,
+    body: data ? data instanceof FormData ? data : JSON.stringify(data) : undefined,
     // credentials: "include",
   });
 
