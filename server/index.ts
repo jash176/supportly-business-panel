@@ -1,8 +1,28 @@
-import express, { type Request, Response, NextFunction } from "express";
+import express, {
+  type Request,
+  Response,
+  NextFunction,
+  Express,
+} from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-
-const app = express();
+import {
+  businessRouter,
+  messageRouter,
+  triggerRouter,
+  widgetRouter,
+} from "./routers";
+import { sendTriggerMessage, updateSessionMeta } from "./controllers";
+import { onlineUsers } from "./config/socket";
+import { errorMiddleware } from "./middlewares";
+import path from "path";
+import { connectDb } from "./config/database";
+import cors from "cors";
+import http from "http";
+import { Server } from "socket.io";
+import dotenv from "dotenv";
+import morgan from "morgan";
+export const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 
@@ -36,6 +56,91 @@ app.use((req, res, next) => {
   next();
 });
 
+dotenv.config();
+
+const port = process.env.PORT;
+// const mongoUri = process.env.MONGO_URI as string;
+
+app.use(
+  cors({
+    origin: "*",
+    methods: ["GET", "POST"],
+  })
+);
+export const server = http.createServer(app);
+export const io = new Server(server, {
+  cors: {
+    origin: "*", // Allow connections from different websites
+    methods: ["GET", "POST"],
+  },
+});
+
+app.use(express.urlencoded({ extended: true }));
+app.use(express.json());
+app.use("/public", express.static(path.resolve(__dirname, "public")));
+app.use(morgan("dev"));
+
+connectDb();
+
+// Error Handling
+app.use(errorMiddleware);
+
+// app.get("/", (req: Request, res: Response) => {
+//   res.send("Hello World");
+// });
+io.on("connection", (socket) => {
+  console.log("New client connected", socket.id);
+  socket.on("join-room", (userId: string) => {
+    onlineUsers.set(userId.toString(), socket.id);
+    console.log(`User ${userId} joined with socket ${socket.id}`);
+  });
+  socket.on("disconnect", () => {
+    console.log("Client disconnected", socket.id);
+    for (const [key, value] of onlineUsers.entries()) {
+      if (value === socket.id) {
+        onlineUsers.delete(key);
+        console.log(`User ${key} disconnected`);
+        break;
+      }
+    }
+  });
+  // In your socket.io setup file
+  socket.on("update_session_meta", async (metadata: SessionMetadata) => {
+    await updateSessionMeta(metadata);
+  });
+  socket.on("trigger-send-message", sendTriggerMessage);
+});
+// app.get("/widget/:apiKey", (req, res) => {
+//   const { apiKey } = req.params;
+
+//   if(!apiKey) {
+//     sendErrorResponse(res, 400, "Invalid API Key");
+//     return;
+//   }
+
+//   const widgetScript = path.resolve(__dirname, "public/chatWidget.bundle.js");
+
+//   fs.readFile(widgetScript, "utf8", (err, data) => {
+//     if (err) {
+//       sendErrorResponse(res, 500, "Error loading widget script");
+//       return;
+//     }
+
+//     // Inject the API Key into the script by wrapping the script in a custom function or variable
+//     const scriptWithApiKey = `
+//       const apiKey = "${apiKey}"; // Injected API Key
+//       ${data}  // Original script content
+//     `;
+
+//     res.set("Content-Type", "application/javascript");
+//     res.send(scriptWithApiKey);
+//   });
+// });
+app.use("/api/business-service", businessRouter);
+app.use("/api/widget-service", widgetRouter);
+app.use("/api/messages-service", messageRouter);
+app.use("/api/trigger-service", triggerRouter);
+
 (async () => {
   const server = await registerRoutes(app);
 
@@ -60,11 +165,7 @@ app.use((req, res, next) => {
   // this serves both the API and the client.
   // It is the only port that is not firewalled.
   const port = 5000;
-  server.listen({
-    port,
-    host: "0.0.0.0",
-    reusePort: true,
-  }, () => {
+  server.listen(port, () => {
     log(`serving on port ${port}`);
   });
 })();
