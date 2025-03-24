@@ -1,6 +1,7 @@
 import { apiRequest } from "../queryClient";
 
 export interface MessageRequest {
+  sid?: string;
   sessionId: string;
 }
 
@@ -17,6 +18,7 @@ export interface Message {
   isRead: boolean;
   createdAt: string;
   updatedAt: string;
+  status?: string
 }
 
 export interface MessagesResponse {
@@ -32,6 +34,22 @@ export const messagesApi = {
       "POST",
       `/messages-service/fetch-message-email`,
       data
+    );
+    return response.json();
+  },
+  sendMessage: async (data: FormData): Promise<MessagesResponse> => {
+    const response = await apiRequest(
+      "POST",
+      "/messages-service/send-message",
+      data,
+    )
+    return response.json();
+  },
+  markAsRead: async (messageIds: string) => {
+    const response = await apiRequest(
+      'POST',
+      '/messages-service/mark-as-read',
+      { messageIds }
     );
     return response.json();
   },

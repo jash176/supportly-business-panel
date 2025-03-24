@@ -1,3 +1,4 @@
 export const config = {
-  apiBaseUrl: import.meta.env.VITE_API_BASE_URL || "https://supportly.site/api",
+  apiBaseUrl: "http://supportly.site/api",
+  socketBaseUrl: "https://supportly.site",
 } as const;
