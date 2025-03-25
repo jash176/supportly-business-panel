@@ -1,5 +1,6 @@
 import { Link, useLocation } from 'wouter';
 import { Home, Users, MapPin, Settings, Search, ChevronLeft, Menu } from 'lucide-react';
+import UserProfileButton from './UserProfileButton';
 
 interface MainSidebarProps {
   isVisible: boolean;
@@ -90,11 +91,12 @@ const MainSidebar: React.FC<MainSidebarProps> = ({ isVisible, toggleSidebar }) =
         </ul>
       </nav>
       
-      <div className="p-4 border-t border-gray-700">
+      <div className="p-4 border-t border-gray-700 space-y-2">
         <button className="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
           <Search className="text-xl lg:mr-3" />
           <span className="hidden lg:block">Search</span>
         </button>
+        <UserProfileButton />
       </div>
     </div>
   );

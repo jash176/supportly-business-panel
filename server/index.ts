@@ -22,6 +22,7 @@ import http from "http";
 import { Server } from "socket.io";
 import dotenv from "dotenv";
 import morgan from "morgan";
+import { ROOT_DIR } from "./dirname";
 export const app: Express = express();
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
@@ -77,7 +78,7 @@ export const io = new Server(server, {
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
-app.use("/public", express.static(path.resolve(__dirname, "public")));
+app.use("/public", express.static(path.resolve(ROOT_DIR, "public")));
 app.use(morgan("dev"));
 
 connectDb();

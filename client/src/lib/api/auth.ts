@@ -26,6 +26,9 @@ export interface LoginResponse {
       updatedAt: string;
     };
   };
+  message: string;
+  status: number;
+  success: boolean;
 }
 
 export interface RegisterResponse {
