@@ -3,7 +3,10 @@ import {
   createAgent,
   createBusiness,
   createBusinessWorkspace,
+  deleteAgent,
+  fetchAgents,
   fetchBusinessId,
+  fetchWorkspaceDetails,
   loginBusiness,
 } from "../controllers";
 import { validateRequests, validateToken } from "../middlewares";
@@ -27,5 +30,11 @@ router.post("/login", loginBusiness);
 router.get("/businessId", fetchBusinessId);
 
 router.post("/create-agent", validateToken, createAgent)
+
+router.get("/fetch-agents", validateToken, fetchAgents)
+
+router.delete("/delete-agent", validateToken, deleteAgent)
+
+router.get("/fetch-workspace-details", validateToken, fetchWorkspaceDetails)
 
 export { router as businessRouter };

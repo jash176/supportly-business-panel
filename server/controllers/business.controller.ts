@@ -37,7 +37,7 @@ export const createBusiness = async (req: Request, res: Response) => {
           name,
           email,
           password: hash,
-          subscriptionPlan: "premium",
+          subscriptionPlan: "freemium",
         },
         { transaction: t }
       );
@@ -232,5 +232,138 @@ export const createAgent = async (req: Request, res: Response) => {
     console.error("Error creating agent:", error);
     sendErrorResponse(res, 500, "Internal server error");
     return;
+  }
+};
+
+export const deleteAgent = async (req: Request, res: Response) => {
+  try {
+    const { agentId } = req.params;
+    const business = req.business;
+
+    // Check if business exists and has permission
+    if (!business || !business.id) {
+      sendErrorResponse(res, 401, "Unauthorized - Business not found");
+      return;
+    }
+
+    // Check if agent exists and belongs to the business
+    const agent = await Agents.findOne({
+      where: {
+        id: agentId,
+        businessId: business.id
+      }
+    });
+
+    if (!agent) {
+      sendErrorResponse(res, 404, "Agent not found");
+      return;
+    }
+
+    // Prevent deletion of owner account
+    if (agent.role === 'owner') {
+      sendErrorResponse(res, 403, "Cannot delete owner account");
+      return;
+    }
+
+    // Delete the agent
+    await Agents.destroy({
+      where: {
+        id: agentId,
+        businessId: business.id
+      }
+    });
+
+    sendSuccessResponse(res, 200, "Agent deleted successfully");
+  } catch (error) {
+    console.error("Error deleting agent:", error);
+    sendErrorResponse(res, 500, "Internal server error");
+  }
+}
+
+export const fetchAgents = async (req: Request, res: Response) => {
+  try {
+    const business = req.business;
+
+    // Check if business exists
+    if (!business || !business.id) {
+      sendErrorResponse(res, 401, "Unauthorized - Business not found");
+      return;
+    }
+
+    // Fetch all agents except owner
+    const agents = await Agents.findAll({
+      where: {
+        businessId: business.id
+      },
+      attributes: ['id', 'name', 'email', 'role', 'createdAt'], // Only select necessary fields
+      order: [['createdAt', 'DESC']] // Sort by creation date
+    });
+
+    sendSuccessResponse(res, 200, "Agents retrieved successfully", {
+      agents,
+      count: agents.length
+    });
+  } catch (error) {
+    console.error("Error fetching agents:", error);
+    sendErrorResponse(res, 500, "Internal server error");
+  }
+}
+
+export const fetchWorkspaceDetails = async (req: Request, res: Response) => {
+  try {
+    const business = req.business;
+
+    // Check if business exists
+    if (!business || !business.id) {
+      sendErrorResponse(res, 401, "Unauthorized - Business not found");
+      return;
+    }
+
+    // Fetch business details including related data
+    const workspaceDetails = await Business.findOne({
+      where: { id: business.id },
+      attributes: [
+        'id',
+        'name',
+        'email',
+        'businessName',
+        'domain',
+        'subscriptionPlan',
+        'maxSeats',
+        'createdAt'
+      ],
+      include: [
+        {
+          model: Widget,
+          as: 'Widget',
+          attributes: [
+            'welcomeMessage',
+            'primaryColor',
+            'isOnline',
+            'offlineMessage'
+          ]
+        },
+        {
+          model: Agents,
+          as: 'Agents',
+          attributes: ['id', 'name', 'email', 'role', 'createdAt'],
+          order: [['createdAt', 'DESC']]
+        }
+      ]
+    });
+
+    if (!workspaceDetails) {
+      sendErrorResponse(res, 404, "Workspace not found");
+      return;
+    }
+
+    sendSuccessResponse(res, 200, "Workspace details retrieved successfully", {
+      workspace: workspaceDetails,
+      agentCount: workspaceDetails.Agents?.length || 0
+    });
+
+  } catch (error) {
+    console.error("Error fetching workspace details:", error);
+    sendErrorResponse(res, 500, "Internal server error");
   }
 };

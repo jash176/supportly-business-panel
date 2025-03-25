@@ -7,6 +7,8 @@ import { useLocation } from 'wouter';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
 import { Upload, Trash2 } from 'lucide-react';
+import AgentsAndTeams from './AgentsAndTeams';
+import WorkspaceInformation from './WorkspaceInfo';
 
 const AccountInformation = () => {
   return (
@@ -148,27 +150,11 @@ const Interface = () => (
 );
 
 const WorkspaceInfo = () => (
-  <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-    <div className="px-6 py-4 border-b border-gray-200">
-      <h2 className="text-lg font-semibold">Workspace Information</h2>
-      <p className="text-sm text-gray-500">Manage your workspace details</p>
-    </div>
-    <div className="p-6">
-      <p className="text-gray-500">Workspace information content goes here</p>
-    </div>
-  </div>
+  <WorkspaceInformation />
 );
 
 const TeamsAndAgents = () => (
-  <div className="bg-white rounded-lg shadow-sm overflow-hidden mb-6">
-    <div className="px-6 py-4 border-b border-gray-200">
-      <h2 className="text-lg font-semibold">Agents & Teams</h2>
-      <p className="text-sm text-gray-500">Manage your team members and their permissions</p>
-    </div>
-    <div className="p-6">
-      <p className="text-gray-500">Teams and agents content goes here</p>
-    </div>
-  </div>
+  <AgentsAndTeams />
 );
 
 const DangerZone = () => (

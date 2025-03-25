@@ -11,7 +11,7 @@ export function useRegisterMutation() {
     mutationFn: authApi.register,
     onSuccess: (response) => {
       login(response.data.token, response.data.business);
-      setLocation("/");
+      setLocation("/create-workspace");
     },
   });
 }

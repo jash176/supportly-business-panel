@@ -1,28 +1,26 @@
-import { useRef, useState } from "react";
+import { useRef, useState, ChangeEvent } from "react";
 import { Button } from "./ui/button";
 import { Share } from "lucide-react";
 
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   accept?: string;
+  render?: (onClick: () => void) => React.ReactNode;
 }
 
-export function FileUpload({
-  onFileSelect,
+export const FileUpload: React.FC<FileUploadProps> = ({ 
+  onFileSelect, 
   accept = "image/*,video/*,.pdf,.doc,.docx",
-}: FileUploadProps) {
+  render 
+}) => {
   const [isLoading, setIsLoading] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleClick = (e: React.MouseEvent) => {
-    e.preventDefault(); // Prevent any default button behavior
-    e.stopPropagation(); // Stop event bubbling
-    fileInputRef.current?.click();
+  const handleClick = () => {
+    inputRef.current?.click();
   };
 
-  const handleFileChange = async (
-    event: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
     try {
       setIsLoading(true);
       const file = event.target.files?.[0];
@@ -57,24 +55,27 @@ export function FileUpload({
     <>
       <input
         type="file"
-        ref={fileInputRef}
-        className="hidden"
+        ref={inputRef}
+        onChange={handleChange}
         accept={accept}
-        onChange={handleFileChange}
-        onClick={(e) => e.stopPropagation()} // Prevent click event bubbling
+        className="hidden"
       />
-      <Button
-        variant="ghost"
-        size="sm"
-        className="flex items-center gap-2 w-full"
-        onClick={handleClick}
-        disabled={isLoading}
-      >
-        <Share className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
-        <span className="text-xs">
-          {isLoading ? "Processing..." : "Share a file"}
-        </span>
-      </Button>
+      {render ? (
+        render(handleClick)
+      ) : (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="flex items-center gap-2 w-full"
+          onClick={handleClick}
+          disabled={isLoading}
+        >
+          <Share className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
+          <span className="text-xs">
+            {isLoading ? "Processing..." : "Share a file"}
+          </span>
+        </Button>
+      )}
     </>
   );
-}
+};
