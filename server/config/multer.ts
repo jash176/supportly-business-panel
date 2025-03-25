@@ -2,11 +2,12 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
+import { ROOT_DIR } from "server/dirname";
 const createMulterUploader = () => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       console.log(file);
-      cb(null, path.resolve(__dirname, "../../public"));
+      cb(null, path.resolve(ROOT_DIR, "../../public"));
     },
     filename: (req, file, cb) => {
       // console.log(file);
@@ -39,7 +40,7 @@ export const uploadMultipleFiles = (arrayOfFields: multer.Field[]) => {
 export const deleteFileFromPublic = (fileName: string) => {
   return new Promise((resolve, reject) => {
     // Define the file path
-    const filePath = path.join(__dirname, "../..", fileName);
+    const filePath = path.join(ROOT_DIR, "../..", fileName);
     console.log("File Path: ", filePath);
     // Check if the file exists
     fs.access(filePath, fs.constants.F_OK, (err) => {

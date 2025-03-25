@@ -6,7 +6,7 @@ import { useAuth } from "@/context/auth";
 import { useToast } from "@/hooks/use-toast";
 import { useLoginMutation } from "@/hooks/useLoginMutation";
 import { Eye, EyeOff } from "lucide-react";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useRouter } from "wouter";
 
 const Login = () => {
@@ -19,6 +19,10 @@ const Login = () => {
   const [errors, setErrors] = useState<{ email?: string; password?: string }>(
     {}
   );
+
+  useEffect(() => {
+    document.title = "Supportly";
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -4,6 +4,7 @@ import path from "path";
 import { type Server } from "http";
 import viteConfig from "../vite.config";
 import { nanoid } from "nanoid";
+import { ROOT_DIR } from "./dirname";
 
 export function log(message: string, source = "express") {
   const formattedTime = new Date().toLocaleTimeString("en-US", {
@@ -44,12 +45,7 @@ export async function setupVite(app: Express, server: Server) {
     const url = req.originalUrl;
 
     try {
-      const clientTemplate = path.resolve(
-        __dirname,
-        "..",
-        "client",
-        "index.html"
-      );
+      const clientTemplate = path.resolve(ROOT_DIR, "client", "index.html");
 
       // always reload the index.html file from disk incase it changes
       let template = await fs.promises.readFile(clientTemplate, "utf-8");
@@ -67,7 +63,7 @@ export async function setupVite(app: Express, server: Server) {
 }
 
 export function serveStatic(app: Express) {
-  const distPath = path.resolve(__dirname, "../../public");
+  const distPath = path.resolve(ROOT_DIR, "../../public");
 
   if (!fs.existsSync(distPath)) {
     throw new Error(

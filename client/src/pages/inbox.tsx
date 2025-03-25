@@ -22,12 +22,15 @@ const Inbox: React.FC = () => {
   );
   const [isVisible, setIsVisible] = useState(false);
   const isMobile = useIsMobile();
-  const { mutate: markAsRead } = useMarkMessagesAsRead(activeChat?.sessionId.toString() ?? "");
+  const { mutate: markAsRead } = useMarkMessagesAsRead(
+    activeChat?.sessionId.toString() ?? ""
+  );
 
   useEffect(() => {
+    document.title = "Inbox";
     // Listen for new messages
     socket.on("receiveMessage", (message: Message) => {
-      console.log("Messages : ", message)
+      console.log("Messages : ", message);
       // Update messages for the specific chat
       queryClient.setQueryData<{ data: Message[] }>(
         [`/messages-service/fetch-message-email/${message.sessionId}`],
@@ -40,46 +43,47 @@ const Inbox: React.FC = () => {
       );
 
       // Update chat list to show latest message
-      queryClient.setQueryData<{ data: any[] }>(
-        ["chats"],
-        (old) => {
-          if (!old?.data) return { data: [] };
-  
-          let chatFound = false;
-  
-          // Create a **new array reference** for React Query to detect changes
-          const updatedChats = old.data.map((chat) => {
-            if (chat.sessionId === message.sessionId) {
-              chatFound = true;
-              console.log("new Date().toISOString() L ", {
-                ...chat,
-                lastMessage: message.content, // ✅ Update lastMessage
-                lastMessageTime: new Date().toISOString(), // ✅ Ensure lastMessageTime updates
-              })
-              return {
-                ...chat,
-                lastMessage: message.content, // ✅ Update lastMessage
-                lastMessageTime: new Date().toISOString(), // ✅ Ensure lastMessageTime updates
-              };
-            }
-            return chat;
-          });
-  
-          // If chat doesn't exist, add it
-          if (!chatFound) {
-            updatedChats.push({
-              sessionId: message.sessionId,
-              lastMessage: message.content,
-              lastMessageTime: new Date().toISOString(),
+      queryClient.setQueryData<{ data: any[] }>(["chats"], (old) => {
+        if (!old?.data) return { data: [] };
+
+        let chatFound = false;
+
+        // Create a **new array reference** for React Query to detect changes
+        const updatedChats = old.data.map((chat) => {
+          if (chat.sessionId === message.sessionId) {
+            chatFound = true;
+            console.log("new Date().toISOString() L ", {
+              ...chat,
+              lastMessage: message.content, // ✅ Update lastMessage
+              lastMessageTime: new Date().toISOString(), // ✅ Ensure lastMessageTime updates
             });
+            return {
+              ...chat,
+              lastMessage: message.content, // ✅ Update lastMessage
+              lastMessageTime: new Date().toISOString(), // ✅ Ensure lastMessageTime updates
+            };
           }
-  
-          // ✅ Sort chats based on `lastMessageTime`
-          updatedChats.sort((a, b) => new Date(b.lastMessageTime).getTime() - new Date(a.lastMessageTime).getTime());
-  
-          return { data: [...updatedChats] }; // ✅ New reference to trigger re-render
+          return chat;
+        });
+
+        // If chat doesn't exist, add it
+        if (!chatFound) {
+          updatedChats.push({
+            sessionId: message.sessionId,
+            lastMessage: message.content,
+            lastMessageTime: new Date().toISOString(),
+          });
         }
-      );
+
+        // ✅ Sort chats based on `lastMessageTime`
+        updatedChats.sort(
+          (a, b) =>
+            new Date(b.lastMessageTime).getTime() -
+            new Date(a.lastMessageTime).getTime()
+        );
+
+        return { data: [...updatedChats] }; // ✅ New reference to trigger re-render
+      });
     });
 
     // Cleanup on unmount
@@ -97,14 +101,14 @@ const Inbox: React.FC = () => {
 
     // Get unread messages for this chat
     const messages = queryClient.getQueryData<{ data: Message[] }>([
-      `/messages-service/fetch-message-email/${chat.sessionId}`
+      `/messages-service/fetch-message-email/${chat.sessionId}`,
     ]);
-    console.log("Messages : ", messages)
+    console.log("Messages : ", messages);
     if (messages?.data) {
       const unreadMessageIds = messages.data
-        .filter(msg => !msg.isRead)
-        .map(msg => msg.id)
-        .join(',');
+        .filter((msg) => !msg.isRead)
+        .map((msg) => msg.id)
+        .join(",");
 
       if (unreadMessageIds) {
         markAsRead(unreadMessageIds);
