@@ -208,7 +208,7 @@ export const fetchConversations = async (req: Request, res: Response) => {
         }
 
         conversation.totalMessages += 1;
-        if (!msg.isRead) {
+        if (!msg.isRead && msg.sender === "customer") {
           conversation.unreadMessages += 1;
         }
       }
