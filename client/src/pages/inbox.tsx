@@ -12,13 +12,10 @@ import { Message } from "@/lib/api/messages";
 import { useSocket } from "@/hooks/useSocket";
 import { useMarkMessagesAsRead } from "@/hooks/useMarkMessagesAsRead";
 import { Chat } from "@/lib/api/inbox";
-import { useWorkspaceInformation } from "@/hooks/useWorkspaceInformation";
-import { useWorkspace } from "@/context/WorkspaceContext";
 
 const Inbox: React.FC = () => {
   const queryClient = useQueryClient();
   const socket = useSocket();
-  const { setWorkspaceData } = useWorkspace();
   const { data: inbox, isLoading, error } = useChats();
   const [activeChat, setActiveChat] = useState(
     inbox && inbox.data ? inbox.data[0] : null
@@ -28,8 +25,6 @@ const Inbox: React.FC = () => {
   const { mutate: markAsRead } = useMarkMessagesAsRead(
     activeChat?.sessionId.toString() ?? ""
   );
-  const { isLoading: isWorkspaceInfoLoading, data: workspaceInfomartion } =
-    useWorkspaceInformation();
 
   useEffect(() => {
     document.title = "Inbox";
@@ -97,10 +92,6 @@ const Inbox: React.FC = () => {
     };
   }, [queryClient]);
 
-  useEffect(() => {
-    setWorkspaceData(workspaceInfomartion?.data);
-  }, [workspaceInfomartion]);
-
   const togglePanel = () => {
     setIsVisible(!isVisible);
   };
@@ -129,7 +120,7 @@ const Inbox: React.FC = () => {
     return <MobileAppDownload />;
   }
 
-  if (isLoading || isWorkspaceInfoLoading) {
+  if (isLoading) {
     return (
       <div className="flex h-full items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin" />
