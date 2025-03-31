@@ -15,6 +15,7 @@ export interface Chat {
   lastMessageTime: string;
   totalMessages: number;
   unreadMessages: number;
+  metadata: SessionMetadata;
 }
 
 export const inboxApi = {

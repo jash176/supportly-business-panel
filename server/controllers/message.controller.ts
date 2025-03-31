@@ -129,6 +129,8 @@ export const fetchConversations = async (req: Request, res: Response) => {
         "geolocationCity",
         "geolocationLatitude",
         "geolocationLongitude",
+        "geolocationCountryCode",
+        // Device information
         // System and browser information
         "osVersion",
         "osName",
@@ -181,6 +183,7 @@ export const fetchConversations = async (req: Request, res: Response) => {
             city: session.geolocationCity,
             latitude: session.geolocationLatitude,
             longitude: session.geolocationLongitude,
+            countryCode: session.geolocationCountryCode,
           },
           system: {
             osVersion: session.osVersion,
@@ -471,6 +474,7 @@ export const updateSessionMeta = async (metadata: SessionMetadata) => {
         geolocationCity: geolocation?.city || null,
         geolocationLatitude: geolocation?.latitude || null,
         geolocationLongitude: geolocation?.longitude || null,
+        geolocationCountryCode: geolocation?.countryCode || null,
 
         // System and browser information
         osVersion: system?.osVersion || null,

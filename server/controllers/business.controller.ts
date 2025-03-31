@@ -250,8 +250,8 @@ export const deleteAgent = async (req: Request, res: Response) => {
     const agent = await Agents.findOne({
       where: {
         id: agentId,
-        businessId: business.id
-      }
+        businessId: business.id,
+      },
     });
 
     if (!agent) {
@@ -260,7 +260,7 @@ export const deleteAgent = async (req: Request, res: Response) => {
     }
 
     // Prevent deletion of owner account
-    if (agent.role === 'owner') {
+    if (agent.role === "owner") {
       sendErrorResponse(res, 403, "Cannot delete owner account");
       return;
     }
@@ -269,8 +269,8 @@ export const deleteAgent = async (req: Request, res: Response) => {
     await Agents.destroy({
       where: {
         id: agentId,
-        businessId: business.id
-      }
+        businessId: business.id,
+      },
     });
 
     sendSuccessResponse(res, 200, "Agent deleted successfully");
@@ -278,7 +278,7 @@ export const deleteAgent = async (req: Request, res: Response) => {
     console.error("Error deleting agent:", error);
     sendErrorResponse(res, 500, "Internal server error");
   }
-}
+};
 
 export const fetchAgents = async (req: Request, res: Response) => {
   try {
@@ -293,21 +293,21 @@ export const fetchAgents = async (req: Request, res: Response) => {
     // Fetch all agents except owner
     const agents = await Agents.findAll({
       where: {
-        businessId: business.id
+        businessId: business.id,
       },
-      attributes: ['id', 'name', 'email', 'role', 'createdAt'], // Only select necessary fields
-      order: [['createdAt', 'DESC']] // Sort by creation date
+      attributes: ["id", "name", "email", "role", "createdAt"], // Only select necessary fields
+      order: [["createdAt", "DESC"]], // Sort by creation date
     });
 
     sendSuccessResponse(res, 200, "Agents retrieved successfully", {
       agents,
-      count: agents.length
+      count: agents.length,
     });
   } catch (error) {
     console.error("Error fetching agents:", error);
     sendErrorResponse(res, 500, "Internal server error");
   }
-}
+};
 
 export const fetchWorkspaceDetails = async (req: Request, res: Response) => {
   try {
@@ -323,33 +323,27 @@ export const fetchWorkspaceDetails = async (req: Request, res: Response) => {
     const workspaceDetails = await Business.findOne({
       where: { id: business.id },
       attributes: [
-        'id',
-        'name',
-        'email',
-        'businessName',
-        'domain',
-        'subscriptionPlan',
-        'maxSeats',
-        'createdAt'
+        "id",
+        "name",
+        "email",
+        "businessName",
+        "domain",
+        "subscriptionPlan",
+        "maxSeats",
+        "createdAt",
       ],
       include: [
         {
           model: Widget,
-          as: 'Widget',
-          attributes: [
-            'welcomeMessage',
-            'primaryColor',
-            'isOnline',
-            'offlineMessage'
-          ]
+          as: "Widget",
         },
         {
           model: Agents,
-          as: 'Agents',
-          attributes: ['id', 'name', 'email', 'role', 'createdAt'],
-          order: [['createdAt', 'DESC']]
-        }
-      ]
+          as: "Agents",
+          attributes: ["id", "name", "email", "role", "createdAt"],
+          order: [["createdAt", "DESC"]],
+        },
+      ],
     });
 
     if (!workspaceDetails) {
@@ -359,9 +353,8 @@ export const fetchWorkspaceDetails = async (req: Request, res: Response) => {
 
     sendSuccessResponse(res, 200, "Workspace details retrieved successfully", {
       workspace: workspaceDetails,
-      agentCount: workspaceDetails.Agents?.length || 0
+      agentCount: workspaceDetails.Agents?.length || 0,
     });
-
   } catch (error) {
     console.error("Error fetching workspace details:", error);
     sendErrorResponse(res, 500, "Internal server error");

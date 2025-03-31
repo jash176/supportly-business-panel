@@ -14,6 +14,8 @@ import { AuthProvider } from "@/context/auth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 import Signup from "./pages/signup";
 import CreateWorkspace from "./pages/create-worspace";
+import React from "react";
+import { WorkspaceProvider } from "@/context/WorkspaceContext";
 
 function PublicRoutes() {
   return (
@@ -68,8 +70,10 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <AuthProvider>
-        <PublicRoutes />
-        <Toaster />
+        <WorkspaceProvider>
+          <PublicRoutes />
+          <Toaster />
+        </WorkspaceProvider>
       </AuthProvider>
     </QueryClientProvider>
   );

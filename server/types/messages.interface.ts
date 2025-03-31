@@ -6,6 +6,7 @@ interface SessionMetadata {
     city?: string;
     latitude?: number;
     longitude?: number;
+    countryCode?: string;
   };
   system?: {
     osVersion?: string;

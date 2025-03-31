@@ -13,7 +13,7 @@ const sequelize = new Sequelize({
 
 export const connectDb = () => {
   try {
-    sequelize.sync({ alter: true, force: true }); // Creates tables if they don't exist
+    sequelize.sync({ alter: true }); // Creates tables if they don't exist
   } catch (error) {
     logger.log("Connection DB Error : ", error);
   }

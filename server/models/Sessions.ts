@@ -19,6 +19,7 @@ interface SessionAttributes {
   geolocationCity: string | null;
   geolocationLatitude: number | null;
   geolocationLongitude: number | null;
+  geolocationCountryCode: string | null; // Optional country code
 
   // System and browser information
   osVersion: string | null;
@@ -42,6 +43,7 @@ interface SessionCreationAttributes
     | "geolocationCity"
     | "geolocationLatitude"
     | "geolocationLongitude"
+    | "geolocationCountryCode"
     | "osName"
     | "engineName"
     | "engineVersion"
@@ -64,6 +66,7 @@ class Session
   public geolocationCity!: string | null;
   public geolocationLatitude!: number | null;
   public geolocationLongitude!: number | null;
+  public geolocationCountryCode!: string | null; // Optional country code
   public osName!: string | null;
   public osVersion!: string | null;
   public engineName!: string | null;
@@ -125,6 +128,10 @@ Session.init(
     geolocationLongitude: {
       type: DataTypes.FLOAT,
       allowNull: true,
+    },
+    geolocationCountryCode: {
+      type: DataTypes.STRING,
+      allowNull: true, // Optional country code
     },
     createdAt: {
       type: DataTypes.DATE,

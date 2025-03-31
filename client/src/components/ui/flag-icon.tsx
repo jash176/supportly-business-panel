@@ -4,7 +4,7 @@ interface FlagIconProps {
 }
 
 const countryToFlag = (isoCode: string): string => {
-  return typeof String.fromCodePoint !== 'undefined'
+  return typeof String.fromCodePoint !== "undefined"
     ? isoCode
         .toUpperCase()
         .replace(/./g, (char) =>

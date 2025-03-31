@@ -91,42 +91,57 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({
           </div> */}
         </div>
 
-        {/* <div className="p-6 overflow-y-auto">
-          <h4 className="font-semibold text-gray-800 mb-4">User Information</h4>
+        {activeChat.metadata && (
+          <div className="p-6 overflow-y-auto">
+            <h4 className="font-semibold text-gray-800 mb-4">
+              User Information
+            </h4>
 
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-500">Email</p>
-              <p className="text-sm text-gray-900">{person.email}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Location</p>
-              <div className="flex items-center">
-                <FlagIcon
-                  countryCode={person.location.countryCode}
-                  className="mr-2"
-                />
+            <div className="space-y-4">
+              <div>
+                <p className="text-sm text-gray-500">Email</p>
                 <p className="text-sm text-gray-900">
-                  {person.location.city}, {person.location.country}
+                  {activeChat?.customerEmail || "unknown"}
+                </p>
+              </div>
+
+              <div>
+                <p className="text-sm text-gray-500">Location</p>
+                <div className="flex items-center ">
+                  {activeChat.metadata.geolocation?.countryCode &&
+                    activeChat.metadata.geolocation?.countryCode !==
+                      "unknwon" && (
+                      <FlagIcon
+                        countryCode={
+                          activeChat.metadata.geolocation?.countryCode
+                        }
+                        className="mr-2"
+                      />
+                    )}
+                  <p className="text-sm text-gray-900">
+                    {activeChat.metadata.geolocation?.city},{" "}
+                    {activeChat.metadata.geolocation?.country}
+                  </p>
+                </div>
+              </div>
+
+              {/* <div>
+              <p className="text-sm text-gray-500">Local Time</p>
+              <p className="text-sm text-gray-900">{person.localTime}</p>
+            </div> */}
+
+              <div>
+                <p className="text-sm text-gray-500">Last Activity</p>
+                <p className="text-sm text-gray-900">
+                  {formatRelative(
+                    new Date(activeChat.lastMessageTime),
+                    new Date()
+                  )}
                 </p>
               </div>
             </div>
 
-            <div>
-              <p className="text-sm text-gray-500">Local Time</p>
-              <p className="text-sm text-gray-900">{person.localTime}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Last Activity</p>
-              <p className="text-sm text-gray-900">
-                {formatRelative(new Date(person.lastActive), new Date())}
-              </p>
-            </div>
-          </div>
-
-          <div className="mt-6">
+            {/* <div className="mt-6">
             <h4 className="font-semibold text-gray-800 mb-4">Notes</h4>
             <Textarea
               rows={3}
@@ -134,8 +149,9 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({
               className="w-full p-3 bg-gray-100 rounded-md resize-none"
               defaultValue={person.notes || ""}
             />
+          </div> */}
           </div>
-        </div> */}
+        )}
       </div>
     </>
   );

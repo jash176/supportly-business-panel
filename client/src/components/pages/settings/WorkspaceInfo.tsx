@@ -1,14 +1,17 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Trash2, Upload } from 'lucide-react';
-import { FileUpload } from '@/components/FileUpload';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Trash2, Upload } from "lucide-react";
+import { FileUpload } from "@/components/FileUpload";
+import { useWorkspace } from "@/context/WorkspaceContext";
 
 const WorkspaceInformation = () => {
-  const [workspaceIcon, setWorkspaceIcon] = useState<string>("https://github.com/shadcn.png");
-
+  const [workspaceIcon, setWorkspaceIcon] = useState<string>(
+    "https://github.com/shadcn.png"
+  );
+  const { workspaceData } = useWorkspace();
   const handleFileSelect = (file: File) => {
     const imageUrl = URL.createObjectURL(file);
     setWorkspaceIcon(imageUrl);
@@ -33,7 +36,7 @@ const WorkspaceInformation = () => {
               <AvatarFallback>WS</AvatarFallback>
             </Avatar>
             <div className="absolute inset-0 flex items-center justify-center bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity rounded-full">
-              <FileUpload 
+              <FileUpload
                 onFileSelect={handleFileSelect}
                 accept="image/*"
                 render={(onClick) => (
@@ -49,7 +52,7 @@ const WorkspaceInformation = () => {
               />
             </div>
           </div>
-          
+
           <div className="flex flex-col items-center md:items-start">
             <p className="text-sm font-medium text-gray-900 mb-1">
               Workspace Icon
@@ -57,8 +60,8 @@ const WorkspaceInformation = () => {
             <p className="text-sm text-gray-500 mb-2">
               Recommended: 200x200px (5MB max)
             </p>
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="sm"
               className="text-red-500 hover:text-red-600 hover:bg-red-50"
               onClick={handleRemoveIcon}
@@ -73,36 +76,46 @@ const WorkspaceInformation = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
               <Label htmlFor="businessName">Business Name</Label>
-              <Input id="businessName" placeholder="Enter your business name" className="mt-1" />
+              <Input
+                id="businessName"
+                placeholder="Enter your business name"
+                className="mt-1"
+                defaultValue={workspaceData?.workspace.businessName}
+              />
             </div>
 
             <div>
               <Label htmlFor="domain">Domain</Label>
-              <Input id="domain" placeholder="yourdomain.com" className="mt-1" />
+              <Input
+                id="domain"
+                placeholder="yourdomain.com"
+                className="mt-1"
+                defaultValue={workspaceData?.workspace.domain}
+              />
             </div>
           </div>
 
           {/* Contact Information Section */}
           <div className="border-t pt-6 mt-6">
             <h3 className="text-lg font-semibold mb-4">Contact Information</h3>
-            
+
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <Label htmlFor="contactEmail">Email Address</Label>
-                <Input 
-                  id="contactEmail" 
-                  type="email" 
-                  placeholder="contact@yourbusiness.com" 
+                <Input
+                  id="contactEmail"
+                  type="email"
+                  placeholder="contact@yourbusiness.com"
                   className="mt-1"
                 />
               </div>
 
               <div>
                 <Label htmlFor="contactPhone">Phone Number</Label>
-                <Input 
-                  id="contactPhone" 
-                  type="tel" 
-                  placeholder="+1 (555) 123-4567" 
+                <Input
+                  id="contactPhone"
+                  type="tel"
+                  placeholder="+1 (555) 123-4567"
                   className="mt-1"
                 />
               </div>

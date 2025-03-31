@@ -143,7 +143,7 @@ app.use("/api/messages-service", messageRouter);
 app.use("/api/trigger-service", triggerRouter);
 
 (async () => {
-  const server = await registerRoutes(app);
+  // const server = await registerRoutes(app);
 
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;

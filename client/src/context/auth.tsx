@@ -5,7 +5,9 @@ interface User {
   id: number;
   businessId: number;
   name: string;
+  lastName?: string;
   email: string;
+  phone?: string;
   password: string;
   role: string;
   avatar: any;
