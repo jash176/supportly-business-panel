@@ -19,13 +19,17 @@ export const sendMail = async (options: {
   subject: string;
   html: string;
 }) => {
-  const mailOptions = {
-    from:
-      process.env.SMTP_FROM || "Your Company Name <noreply@yourcompany.com>",
-    ...options,
-  };
-
-  return transporter.sendMail(mailOptions);
+  try {
+    const mailOptions = {
+      from:
+        process.env.SMTP_FROM || "Your Company Name <noreply@yourcompany.com>",
+      ...options,
+    };
+  
+    return transporter.sendMail(mailOptions);
+  }catch(error){
+    console.log("Email send error : ", error)
+  }
 };
 
 // Verify connection configuration

@@ -11,7 +11,7 @@ import ApiKey from "../models/ApiKey.js";
 import Widget from "../models/Widget.js";
 import Agents from "../models/Agents.js";
 import { sendMail } from "../config/nodemailer.js";
-import { welcomeEmailTemplate } from "../templates/email";
+import { agentInviteTemplate, welcomeEmailTemplate } from "../templates/email";
 // Create a new business
 export const createBusiness = async (req: Request, res: Response) => {
   try {
@@ -224,6 +224,18 @@ export const createAgent = async (req: Request, res: Response) => {
       email,
       name,
       password: hash,
+    });
+
+    await sendMail({
+      to: email,
+      subject: `Welcome to Your ${business.businessName} Workspace!`,
+      html: agentInviteTemplate({
+        businessName: business?.businessName || "",
+        agentName: name,
+        email,
+        password,
+        loginUrl: `https://supportly.site/login`,
+      }),
     });
 
     sendSuccessResponse(res, 201, "Agent created", { agent });

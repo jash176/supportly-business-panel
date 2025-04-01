@@ -108,3 +108,98 @@ export const passwordResetTemplate = (data: {
 </body>
 </html>
 `;
+
+export const agentInviteTemplate = ({
+    businessName,
+    agentName,
+    email,
+    password,
+    loginUrl
+  }: {
+    businessName: string;
+    agentName?: string;
+    email: string;
+    password: string;
+    loginUrl: string;
+  }) => {
+    return `
+      <!DOCTYPE html>
+      <html>
+      <head>
+        <meta charset="utf-8">
+        <title>Welcome to ${businessName} Team</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+          }
+          .container {
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            padding: 20px;
+          }
+          .header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+          }
+          .content {
+            padding: 20px 0;
+          }
+          .credentials {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin: 20px 0;
+          }
+          .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin-top: 20px;
+          }
+          .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #777;
+            padding-top: 20px;
+            border-top: 1px solid #eee;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <div class="header">
+            <h2>Welcome to ${businessName}!</h2>
+          </div>
+          <div class="content">
+            <p>Hello ${agentName || 'there'},</p>
+            <p>You have been invited to join the ${businessName} team as an agent. Below are your login credentials:</p>
+            
+            <div class="credentials">
+              <p><strong>Email:</strong> ${email}</p>
+              <p><strong>Password:</strong> ${password}</p>
+            </div>
+            
+            <p>Please use these credentials to log in to your account. For security reasons, we recommend changing your password after your first login.</p>
+            
+            <a href="${loginUrl}" class="button">Login to Your Account</a>
+            
+            <p>If you have any questions or need assistance, please contact your administrator.</p>
+          </div>
+          <div class="footer">
+            <p>This is an automated message, please do not reply to this email.</p>
+            <p>&copy; ${new Date().getFullYear()} ${businessName}. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>
+    `;
+  };
