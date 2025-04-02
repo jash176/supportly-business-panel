@@ -2,7 +2,7 @@ import multer from "multer";
 import path from "path";
 import fs from "fs";
 import { v4 as uuidv4 } from "uuid";
-import { ROOT_DIR } from "server/dirname";
+import { ROOT_DIR } from "../dirname";
 const createMulterUploader = () => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
