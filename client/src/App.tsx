@@ -7,8 +7,8 @@ import NotFound from "@/pages/not-found";
 import MainLayout from "@/components/layouts/Main";
 import Inbox from "@/pages/inbox";
 import Contacts from "@/pages/contacts";
-import Visitors from "@/pages/visitors";
-import Settings from "@/pages/settings";
+import Visitors from "@/pages/Visitors";
+import Settings from "@/pages/Settings";
 import Login from "./pages/login";
 import { AuthProvider } from "@/context/auth";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
@@ -16,6 +16,7 @@ import Signup from "./pages/signup";
 import CreateWorkspace from "./pages/create-worspace";
 import React from "react";
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
+import WidgetCustomization from "./pages/widget-customization";
 
 function PublicRoutes() {
   return (
@@ -25,6 +26,11 @@ function PublicRoutes() {
       <Route path="/create-workspace">
         <ProtectedRoute>
           <CreateWorkspace />
+        </ProtectedRoute>
+      </Route>
+      <Route path="/widget-customization">
+        <ProtectedRoute>
+          <WidgetCustomization />
         </ProtectedRoute>
       </Route>
       <Route>

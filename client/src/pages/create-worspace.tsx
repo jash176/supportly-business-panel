@@ -48,10 +48,11 @@ const CreateWorkspace = () => {
         businessName,
         domain: website,
       });
-      setLocation("/inbox");
+      // Navigate to widget customization page instead of inbox
+      setLocation("/widget-customization");
       toast({
         title: "Success",
-        description: "Workspace created successfully!",
+        description: "Workspace created successfully! Now let's customize your widget.",
       });
     } catch (error) {
       toast({

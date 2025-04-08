@@ -12,6 +12,8 @@ interface SessionAttributes {
   assignedAgentId: number | null;
   isResolved: boolean; // Whether the chat is resolved or not
   createdAt: Date;
+  notes: string | null; // Notes about the session
+  segments: string[]; // Array of customer segments or tags
 
   // Geolocation information
   geolocationCountry: string | null;
@@ -38,6 +40,8 @@ interface SessionCreationAttributes
     | "assignedAgentId"
     | "isResolved"
     | "createdAt"
+    | "notes"
+    | "segments"
     | "geolocationCountry"
     | "geolocationRegion"
     | "geolocationCity"
@@ -61,6 +65,8 @@ class Session
   public customerEmail!: string | null;
   public sid!: string;
   public assignedAgentId!: number | null;
+  public notes!: string | null;
+  public segments!: string[];
   public geolocationCountry!: string | null;
   public geolocationRegion!: string | null;
   public geolocationCity!: string | null;
@@ -108,6 +114,15 @@ Session.init(
     isResolved: {
       type: DataTypes.BOOLEAN,
       defaultValue: false, // By default, session is active
+    },
+    notes: {
+      type: DataTypes.TEXT,
+      allowNull: true, // Optional notes about the session
+      defaultValue: "",
+    },
+    segments: {
+      type: DataTypes.JSON, // Using JSON type to store array of strings
+      defaultValue: [], // Default to empty array
     },
     geolocationCountry: {
       type: DataTypes.STRING,

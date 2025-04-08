@@ -1,7 +1,6 @@
 import express from "express";
-import { validateRequests, validateToken } from "../middlewares";
+import { validateToken } from "../middlewares";
 import { getWidgetSettings, updateWidget } from "../controllers";
-import { getWidgetSchema } from "../utils/validations";
 import { uploadSingleFile } from "../config/multer";
 const router = express.Router();
 
