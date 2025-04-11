@@ -1,5 +1,7 @@
 import { Request, Response } from "express";
 import Session from "../models/Sessions";
+import { sendErrorResponse, sendSuccessResponse } from "../utils/responseHandler";
+import { Op } from "sequelize";
 // Get all sessions for a business
 export const getBusinessSessions = async (req: Request, res: Response) => {
   try {
@@ -9,11 +11,10 @@ export const getBusinessSessions = async (req: Request, res: Response) => {
       where: { businessId },
       order: [["createdAt", "DESC"]],
     });
-    
-    return res.status(200).json(sessions);
+    sendSuccessResponse(res, 200, "Session fetched successfully", sessions);
   } catch (error) {
     console.error("Error fetching sessions:", error);
-    return res.status(500).json({ message: "Failed to fetch sessions" });
+    sendErrorResponse(res, 500, "Failed to fetch sessions");
   }
 };
 
@@ -25,13 +26,12 @@ export const getSessionById = async (req: Request, res: Response) => {
     const session = await Session.findByPk(sessionId);
     
     if (!session) {
-      return res.status(404).json({ message: "Session not found" });
+      sendErrorResponse(res, 404, "Session not found");
     }
-    
-    return res.status(200).json(session);
+    sendSuccessResponse(res, 200, "Session fetched successfully", session);
   } catch (error) {
     console.error("Error fetching session:", error);
-    return res.status(500).json({ message: "Failed to fetch session" });
+    sendErrorResponse(res, 500, "Failed to fetch session");
   }
 };
 
@@ -134,3 +134,31 @@ export const assignAgentToSession = async (req: Request, res: Response) => {
     return res.status(500).json({ message: "Failed to assign agent to session" });
   }
 };
+
+// Get all contacts (sessions with unique emails)
+
+export const getAllContacts = async (req: Request, res: Response) => {
+  const business = req.business;
+  if(!business) {
+    sendErrorResponse(res, 401, "Unauthorized");
+    return;
+  }
+  const businessId = business.id;
+  try {
+    const contacts = await Session.findAll({
+      where: {
+        businessId: businessId,
+        customerEmail: {
+          [Op.and]: {
+            [Op.ne]: null,
+          }
+        },
+      }
+    });
+
+    sendSuccessResponse(res, 200, "Contacts fetched successfully", contacts);
+  } catch (error) {
+    console.error("Error fetching contacts:", error);
+    sendErrorResponse(res, 500, "Failed to fetch contacts");
+  }
+}

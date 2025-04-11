@@ -3,6 +3,21 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1" />
+    <script type="text/javascript">
+      window.apiKey = "3794809956c8e77f4588f0528192064d056c4239db61e06a5326d1589ec238e2"; // Replace API_KEY with your actual API key
+      (function() {
+      var d = document, s = d.createElement("script");
+      s.src = "http://127.0.0.1:5501/dist/chatWidget.bundle.js";
+      s.async = 1;
+      s.onload = function() {
+          console.log("window.ChatWidget : ", window.ChatWidget)
+        if (window.ChatWidget && typeof window.ChatWidget.mount === "function") {
+          window.ChatWidget.mount();
+        }
+      };
+      d.getElementsByTagName("head")[0].appendChild(s);
+    })();
+    </script>
   </head>
   <body>
     <div id="root"></div>

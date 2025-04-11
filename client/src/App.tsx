@@ -17,10 +17,12 @@ import CreateWorkspace from "./pages/create-worspace";
 import React from "react";
 import { WorkspaceProvider } from "@/context/WorkspaceContext";
 import WidgetCustomization from "./pages/widget-customization";
+import LandingPage from "./pages/landing";
 
 function PublicRoutes() {
   return (
     <Switch>
+      <Route path="/" component={LandingPage} />
       <Route path="/login" component={Login} />
       <Route path="/signup" component={Signup} />
       <Route path="/create-workspace">
@@ -52,7 +54,6 @@ function PrivateRoutes() {
   return (
     <MainLayout>
       <Switch>
-        <Route path="/" component={Inbox} />
         <Route path="/create-workspace" component={CreateWorkspace} />
         <Route path="/inbox" component={Inbox} />
         <Route path="/contacts" component={Contacts} />

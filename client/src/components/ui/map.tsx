@@ -99,12 +99,6 @@ const WorldMap: React.FC<MapProps> = ({ visitors, onMarkerClick }) => {
         minZoom={2}
         maxZoom={4}
         maxBounds={[[-90, -180], [90, 180]]}
-        zoomend={(e: any) => {
-          const currentZoom = e.target.getZoom();
-          if (currentZoom > 3) {
-            setShowZoomPaywall(true);
-          }
-        }}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
@@ -149,29 +143,6 @@ const WorldMap: React.FC<MapProps> = ({ visitors, onMarkerClick }) => {
           align-items: center;
         }
       `}</style>
-      
-      {/* Info tooltip */}
-      <div className="absolute bottom-4 right-4 bg-white p-4 rounded-md shadow-md z-[1000]">
-        <h4 className="font-semibold text-sm mb-2">Visitor Statistics</h4>
-        <ul className="text-xs space-y-1">
-          <li className="flex justify-between">
-            <span>North America</span>
-            <span className="font-medium">42%</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Europe</span>
-            <span className="font-medium">28%</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Asia</span>
-            <span className="font-medium">18%</span>
-          </li>
-          <li className="flex justify-between">
-            <span>Other</span>
-            <span className="font-medium">12%</span>
-          </li>
-        </ul>
-      </div>
     </div>
   );
 };

@@ -1,7 +1,4 @@
-// import { Image } from "@radix-ui/react-avatar";
 import AudioPlayer from "@/components/ui/audio-player";
-import { FileAudio, FileText } from "lucide-react";
-
 interface MessageContentProps {
   contentType: "text" | "image" | "audio" | "email_prompt";
   content: string;

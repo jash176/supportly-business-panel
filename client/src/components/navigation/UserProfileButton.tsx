@@ -13,7 +13,7 @@ const UserProfileButton = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-gray-700 hover:text-white rounded-md">
+        <button className="flex items-center w-full px-4 py-2 text-gray-300 hover:bg-purple-800 hover:text-white rounded-md">
           <User className="text-xl lg:mr-3" />
           <span className="hidden lg:block">Profile</span>
         </button>

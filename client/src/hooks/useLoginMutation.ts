@@ -14,7 +14,7 @@ export function useLoginMutation() {
       if(response.success) {
         console.log("Response", response.success);
         login(response.data.token, response.data.user);
-        setLocation("/");
+        setLocation("/inbox");
         return;
       }
       toast({
