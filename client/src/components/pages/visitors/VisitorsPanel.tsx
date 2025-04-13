@@ -1,30 +1,43 @@
-import { useState } from 'react';
-import { Input } from '@/components/ui/input';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Search, MapPin } from 'lucide-react';
-import { Visitor } from '@/data/mockData';
-import FlagIcon from '@/components/ui/flag-icon';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useState } from "react";
+import { Input } from "@/components/ui/input";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Search, MapPin } from "lucide-react";
+import FlagIcon from "@/components/ui/flag-icon";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 
 interface VisitorsPanelProps {
-  visitors: Visitor[];
-  activeVisitor: Visitor | null;
-  onVisitorSelect: (visitor: Visitor) => void;
+  visitors: SessionAttributes[];
+  onVisitorSelect: (visitor: SessionAttributes) => void;
 }
 
-const VisitorsPanel: React.FC<VisitorsPanelProps> = ({ visitors, activeVisitor, onVisitorSelect }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  const [regionFilter, setRegionFilter] = useState('all');
-  
+const VisitorsPanel: React.FC<VisitorsPanelProps> = ({
+  visitors,
+  onVisitorSelect,
+}) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [regionFilter, setRegionFilter] = useState("all");
+
   // Filter visitors by search query and region
-  const filteredVisitors = visitors.filter(visitor => {
-    const matchesSearch = searchQuery.trim() === '' || 
-      visitor.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      visitor.location.city.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      visitor.location.country.toLowerCase().includes(searchQuery.toLowerCase());
-      
-    const matchesRegion = regionFilter === 'all' || visitor.location.region === regionFilter;
-    
+  const filteredVisitors = visitors.filter((visitor) => {
+    const matchesSearch =
+      searchQuery.trim() === "" ||
+      visitor?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      visitor?.geolocationCity
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase()) ||
+      visitor?.geolocationCountry
+        ?.toLowerCase()
+        .includes(searchQuery.toLowerCase());
+
+    const matchesRegion =
+      regionFilter === "all" || visitor.geolocationRegion === regionFilter;
+
     return matchesSearch && matchesRegion;
   });
 
@@ -45,11 +58,10 @@ const VisitorsPanel: React.FC<VisitorsPanelProps> = ({ visitors, activeVisitor, 
           </div>
         </div>
         <div className="flex items-center justify-between mt-4">
-          <span className="text-sm text-gray-500">{filteredVisitors.length} visitors online</span>
-          <Select 
-            defaultValue="all" 
-            onValueChange={setRegionFilter}
-          >
+          <span className="text-sm text-gray-500">
+            {filteredVisitors.length} visitors online
+          </span>
+          <Select defaultValue="all" onValueChange={setRegionFilter}>
             <SelectTrigger className="w-[130px] text-sm bg-gray-100 border-0">
               <SelectValue placeholder="All regions" />
             </SelectTrigger>
@@ -65,40 +77,45 @@ const VisitorsPanel: React.FC<VisitorsPanelProps> = ({ visitors, activeVisitor, 
           </Select>
         </div>
       </div>
-      
+
       <div className="overflow-y-auto h-full scrollbar-hide">
         {filteredVisitors.map((visitor) => (
-          <div 
+          <div
             key={visitor.id}
-            className={`p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer ${
-              activeVisitor?.id === visitor.id ? 'bg-gray-50' : ''
-            }`}
+            className={`p-4 border-b border-gray-200 hover:bg-gray-50 cursor-pointer`}
             onClick={() => onVisitorSelect(visitor)}
           >
             <div className="flex items-center">
               <div className="relative mr-3">
                 <Avatar className="w-10 h-10">
-                  <AvatarImage src={visitor.avatar} alt={visitor.name} />
+                  <AvatarImage src={""} alt={visitor.name} />
                   <AvatarFallback>{visitor.name.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 border-2 border-white rounded-full"></span>
               </div>
               <div className="flex-1 min-w-0">
                 <div className="flex justify-between">
-                  <h3 className="font-semibold text-gray-900">{visitor.name}</h3>
+                  <h3 className="font-semibold text-gray-900">
+                    {visitor.name}
+                  </h3>
                   <div className="flex items-center">
-                    <FlagIcon countryCode={visitor.location.countryCode} className="mr-1" />
+                    <FlagIcon
+                      countryCode={visitor.geolocationCountryCode ?? ""}
+                      className="mr-1"
+                    />
                   </div>
                 </div>
                 <div className="flex items-center text-sm text-gray-500">
                   <MapPin className="text-gray-400 mr-1 h-4 w-4" />
-                  <span>{visitor.location.city}, {visitor.location.country}</span>
+                  <span>
+                    {visitor.geolocationCity}, {visitor.geolocationCountry}
+                  </span>
                 </div>
               </div>
             </div>
           </div>
         ))}
-        
+
         {filteredVisitors.length === 0 && (
           <div className="p-8 text-center">
             <p className="text-gray-500">No visitors found</p>

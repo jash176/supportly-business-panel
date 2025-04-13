@@ -5,22 +5,24 @@ import { Share } from "lucide-react";
 interface FileUploadProps {
   onFileSelect: (file: File) => void;
   accept?: string;
-  render?: (onClick: () => void) => React.ReactNode;
 }
 
-export const FileUpload: React.FC<FileUploadProps> = ({ 
-  onFileSelect, 
-  accept = "image/*,video/*,.pdf,.doc,.docx",
-  render 
+export const FileUpload: React.FC<FileUploadProps> = ({
+  onFileSelect,
+  accept = "image/*,.pdf,.doc,.docx",
 }) => {
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const handleClick = () => {
-    inputRef.current?.click();
+    if (inputRef.current) {
+      inputRef.current.value = ""; // Allow same file to be re-selected
+      inputRef.current.click();
+    }
   };
 
   const handleChange = async (event: ChangeEvent<HTMLInputElement>) => {
+    console.log("handleChange");
     try {
       setIsLoading(true);
       const file = event.target.files?.[0];
@@ -51,31 +53,32 @@ export const FileUpload: React.FC<FileUploadProps> = ({
     }
   };
 
+  const handleInputChange = (e: ChangeEvent<HTMLInputElement>) => {
+    console.log("onChange triggered");
+    handleChange(e);
+  };
+
   return (
     <>
       <input
         type="file"
         ref={inputRef}
-        onChange={handleChange}
+        onChange={handleInputChange}
         accept={accept}
         className="hidden"
       />
-      {render ? (
-        render(handleClick)
-      ) : (
-        <Button
-          variant="ghost"
-          size="sm"
-          className="flex items-center gap-2 w-full"
-          onClick={handleClick}
-          disabled={isLoading}
-        >
-          <Share className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
-          <span className="text-xs">
-            {isLoading ? "Processing..." : "Share a file"}
-          </span>
-        </Button>
-      )}
+      <Button
+        variant="ghost"
+        size="sm"
+        className="flex items-center gap-2 w-full"
+        onClick={handleClick}
+        disabled={isLoading}
+      >
+        <Share className={`h-3 w-3 ${isLoading ? "animate-spin" : ""}`} />
+        <span className="text-xs">
+          {isLoading ? "Processing..." : "Share a file"}
+        </span>
+      </Button>
     </>
   );
 };

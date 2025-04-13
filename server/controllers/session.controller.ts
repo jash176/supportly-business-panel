@@ -1,12 +1,16 @@
 import { Request, Response } from "express";
 import Session from "../models/Sessions";
-import { sendErrorResponse, sendSuccessResponse } from "../utils/responseHandler";
+import {
+  sendErrorResponse,
+  sendSuccessResponse,
+} from "../utils/responseHandler";
 import { Op } from "sequelize";
+import { onlineUsers } from "server/config/socket";
 // Get all sessions for a business
 export const getBusinessSessions = async (req: Request, res: Response) => {
   try {
     const { businessId } = req.params;
-    
+
     const sessions = await Session.findAll({
       where: { businessId },
       order: [["createdAt", "DESC"]],
@@ -22,9 +26,9 @@ export const getBusinessSessions = async (req: Request, res: Response) => {
 export const getSessionById = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
-    
+
     const session = await Session.findByPk(sessionId);
-    
+
     if (!session) {
       sendErrorResponse(res, 404, "Session not found");
     }
@@ -39,43 +43,38 @@ export const getSessionById = async (req: Request, res: Response) => {
 export const updateSession = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
-    const {
-      assignedAgentId,
-      isResolved,
-      notes,
-      segments,
-      customerEmail,
-    } = req.body;
-    
+    const { assignedAgentId, isResolved, notes, segments, customerEmail } =
+      req.body;
+
     const session = await Session.findByPk(sessionId);
-    
+
     if (!session) {
       return res.status(404).json({ message: "Session not found" });
     }
-    
+
     // Update session properties
     if (assignedAgentId !== undefined) {
       session.assignedAgentId = assignedAgentId;
     }
-    
+
     if (isResolved !== undefined) {
       session.isResolved = isResolved;
     }
-    
+
     if (notes !== undefined) {
       session.notes = notes;
     }
-    
+
     if (segments !== undefined) {
       session.segments = segments;
     }
-    
+
     if (customerEmail !== undefined) {
       session.customerEmail = customerEmail;
     }
-    
+
     await session.save();
-    
+
     return res.status(200).json({
       message: "Session updated successfully",
       session,
@@ -90,16 +89,16 @@ export const updateSession = async (req: Request, res: Response) => {
 export const resolveSession = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
-    
+
     const session = await Session.findByPk(sessionId);
-    
+
     if (!session) {
       return res.status(404).json({ message: "Session not found" });
     }
-    
+
     session.isResolved = true;
     await session.save();
-    
+
     return res.status(200).json({
       message: "Session marked as resolved",
       session,
@@ -115,50 +114,85 @@ export const assignAgentToSession = async (req: Request, res: Response) => {
   try {
     const { sessionId } = req.params;
     const { agentId } = req.body;
-    
+
     const session = await Session.findByPk(sessionId);
-    
+
     if (!session) {
       return res.status(404).json({ message: "Session not found" });
     }
-    
+
     session.assignedAgentId = agentId;
     await session.save();
-    
+
     return res.status(200).json({
       message: "Agent assigned to session successfully",
       session,
     });
   } catch (error) {
     console.error("Error assigning agent:", error);
-    return res.status(500).json({ message: "Failed to assign agent to session" });
+    return res
+      .status(500)
+      .json({ message: "Failed to assign agent to session" });
   }
 };
 
 // Get all contacts (sessions with unique emails)
 
 export const getAllContacts = async (req: Request, res: Response) => {
-  const business = req.business;
-  if(!business) {
-    sendErrorResponse(res, 401, "Unauthorized");
-    return;
-  }
-  const businessId = business.id;
   try {
+    const business = req.business;
+    if (!business) {
+      sendErrorResponse(res, 401, "Unauthorized");
+      return;
+    }
+    const businessId = business.id;
     const contacts = await Session.findAll({
       where: {
         businessId: businessId,
         customerEmail: {
           [Op.and]: {
             [Op.ne]: null,
-          }
+          },
         },
-      }
+      },
     });
 
     sendSuccessResponse(res, 200, "Contacts fetched successfully", contacts);
+    return;
   } catch (error) {
     console.error("Error fetching contacts:", error);
     sendErrorResponse(res, 500, "Failed to fetch contacts");
+    return;
   }
-}
+};
+
+export const getActiveVisitors = async (req: Request, res: Response) => {
+  try {
+    const business = req.business;
+    if (!business) {
+      sendErrorResponse(res, 401, "Unauthorized");
+      return;
+    }
+    const businessId = business.id;
+    const onlineSessionIds = Array.from(onlineUsers.keys());
+    console.log("onlineSessionIds : ", onlineSessionIds, onlineUsers);
+    const activeVisitors = await Session.findAll({
+      where: {
+        businessId: businessId,
+        sid: {
+          [Op.in]: onlineSessionIds,
+        },
+      },
+    });
+    sendSuccessResponse(
+      res,
+      200,
+      "Active visitors fetched successfully",
+      activeVisitors
+    );
+  } catch (error) {
+    console.error("Error fetching active visitors:", error);
+    sendErrorResponse(res, 500, "Failed to fetch active visitors");
+    return;
+  }
+};

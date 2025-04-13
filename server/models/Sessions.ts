@@ -4,39 +4,11 @@ import sequelize from "../config/database";
 import Business from "./Business";
 import Agents from "./Agents";
 
-interface SessionAttributes {
-  id: number;
-  businessId: number;
-  customerEmail: string | null;
-  sid: string; // Used for anonymous users
-  assignedAgentId: number | null;
-  isResolved: boolean; // Whether the chat is resolved or not
-  createdAt: Date;
-  notes: string | null; // Notes about the session
-  segments: string[]; // Array of customer segments or tags
-
-  // Geolocation information
-  geolocationCountry: string | null;
-  geolocationRegion: string | null;
-  geolocationCity: string | null;
-  geolocationLatitude: number | null;
-  geolocationLongitude: number | null;
-  geolocationCountryCode: string | null; // Optional country code
-
-  // System and browser information
-  osVersion: string | null;
-  osName: string | null;
-  engineName: string | null;
-  engineVersion: string | null;
-  browserName: string | null;
-  browserVersion: string | null;
-  userAgent: string | null;
-}
-
 interface SessionCreationAttributes
   extends Optional<
     SessionAttributes,
     | "id"
+    | "name"
     | "assignedAgentId"
     | "isResolved"
     | "createdAt"
@@ -54,6 +26,8 @@ interface SessionCreationAttributes
     | "browserName"
     | "browserVersion"
     | "userAgent"
+    | "lastActive"
+    | "ratings"
   > {}
 
 class Session
@@ -62,6 +36,7 @@ class Session
 {
   public id!: number;
   public businessId!: number;
+  public name!: string | null;
   public customerEmail!: string | null;
   public sid!: string;
   public assignedAgentId!: number | null;
@@ -81,6 +56,8 @@ class Session
   public browserVersion!: string | null;
   public userAgent!: string | null;
   public isResolved!: boolean;
+  public lastActive!: Date | null;
+  public ratings!: number | null;
   public readonly createdAt!: Date;
 
   // Relationships
@@ -100,6 +77,10 @@ Session.init(
       allowNull: false,
     },
     customerEmail: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    name: {
       type: DataTypes.STRING,
       allowNull: true,
     },
@@ -151,6 +132,19 @@ Session.init(
     createdAt: {
       type: DataTypes.DATE,
       defaultValue: DataTypes.NOW,
+    },
+    lastActive: {
+      type: DataTypes.DATE,
+      allowNull: true,
+      defaultValue: DataTypes.NOW,
+    },
+    ratings: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      validate: {
+        min: 1,
+        max: 5,
+      },
     },
     // System and browser columns
     osVersion: {

@@ -167,7 +167,7 @@ export const fetchConversations = async (req: Request, res: Response) => {
       sessionMap.set(session.id, {
         sessionId: session.id,
         sid: session.sid,
-        name,
+        name: session.name ?? name,
         customerEmail: session.customerEmail,
         isResolved: session.isResolved,
         lastMessage: null,
@@ -288,7 +288,11 @@ export const markAsRead = async (req: Request, res: Response) => {
 export const updateUserEmail = async (req: Request, res: Response) => {
   try {
     const { sessionId, customerEmail } = req.body;
-    await Session.update({ customerEmail }, { where: { sid: sessionId } });
+    const newName = customerEmail.split("@")[0];
+    await Session.update(
+      { customerEmail, name: newName },
+      { where: { sid: sessionId } }
+    );
     sendSuccessResponse(res, 200, "User email updated!");
   } catch (error) {
     logger.error("Error updating email : ", error);
@@ -341,10 +345,16 @@ export const getMessagesForCustomer = async (req: Request, res: Response) => {
       attributes: ["id", "customerEmail", "isResolved"], // Fetch relevant session data
     });
     if (!session) {
+      const sessionCount = await Session.count({
+        where: { businessId: apiKeyRecord.businessId },
+      });
+
+      const visitorName = `visitor ${sessionCount + 1}`;
       const newSession = await Session.create({
         businessId: apiKeyRecord.businessId,
         customerEmail: null,
         sid: sessionId as string, // Used for anonymous users
+        name: visitorName,
       });
       const widget = await Widget.findOne({
         where: { businessId: apiKeyRecord.businessId },

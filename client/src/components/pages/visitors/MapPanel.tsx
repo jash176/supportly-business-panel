@@ -1,22 +1,31 @@
-import { useState } from 'react';
-import { RefreshCw } from 'lucide-react';
-import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import WorldMap from '@/components/ui/map';
-import { Visitor } from '@/data/mockData';
+import { useState } from "react";
+import { RefreshCw } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import WorldMap from "@/components/ui/map";
 
 interface MapPanelProps {
-  visitors: Visitor[];
-  activeVisitor: Visitor | null;
-  onVisitorSelect: (visitor: Visitor) => void;
+  visitors: SessionAttributes[];
+  onVisitorSelect: (visitor: SessionAttributes) => void;
+  onRefresh: () => void;
 }
 
-const MapPanel: React.FC<MapPanelProps> = ({ visitors, activeVisitor, onVisitorSelect }) => {
-  const [timeframe, setTimeframe] = useState('24h');
+const MapPanel: React.FC<MapPanelProps> = ({
+  visitors,
+  onVisitorSelect,
+  onRefresh,
+}) => {
+  const [timeframe, setTimeframe] = useState("24h");
 
   const handleRefresh = () => {
     // In a real app, this would refresh the visitor data
-    console.log('Refreshing visitor data');
+    onRefresh();
   };
 
   return (
@@ -25,17 +34,14 @@ const MapPanel: React.FC<MapPanelProps> = ({ visitors, activeVisitor, onVisitorS
         <div className="flex items-center justify-between">
           <h2 className="text-lg font-semibold">Visitor Map</h2>
           <div className="flex">
-            <Button 
-              variant="outline" 
+            <Button
+              variant="outline"
               className="flex items-center mr-2 text-sm"
               onClick={handleRefresh}
             >
               <RefreshCw className="h-4 w-4 mr-1" /> Refresh
             </Button>
-            <Select 
-              defaultValue="24h" 
-              onValueChange={setTimeframe}
-            >
+            <Select defaultValue="24h" onValueChange={setTimeframe}>
               <SelectTrigger className="w-[130px] text-sm bg-gray-100 border-0">
                 <SelectValue placeholder="Last 24 hours" />
               </SelectTrigger>
@@ -48,13 +54,10 @@ const MapPanel: React.FC<MapPanelProps> = ({ visitors, activeVisitor, onVisitorS
           </div>
         </div>
       </div>
-      
+
       <div className="flex-1 p-4">
         <div className="bg-white rounded-lg shadow-sm h-full overflow-hidden">
-          <WorldMap 
-            visitors={visitors}
-            onMarkerClick={onVisitorSelect}
-          />
+          <WorldMap visitors={visitors} onMarkerClick={onVisitorSelect} />
         </div>
       </div>
     </div>

@@ -11,9 +11,10 @@ import {
   messageRouter,
   triggerRouter,
   widgetRouter,
+  sessionRouter,
 } from "./routers";
 import { sendTriggerMessage, updateSessionMeta } from "./controllers";
-import { onlineUsers } from "./config/socket";
+import { liveVisitors, onlineUsers } from "./config/socket";
 import { errorMiddleware } from "./middlewares";
 import path from "path";
 import { connectDb } from "./config/database";
@@ -95,6 +96,7 @@ io.on("connection", (socket) => {
     onlineUsers.set(userId.toString(), socket.id);
     console.log(`User ${userId} joined with socket ${socket.id}`);
   });
+
   socket.on("disconnect", () => {
     console.log("Client disconnected", socket.id);
     for (const [key, value] of onlineUsers.entries()) {
@@ -111,36 +113,12 @@ io.on("connection", (socket) => {
   });
   socket.on("trigger-send-message", sendTriggerMessage);
 });
-// app.get("/widget/:apiKey", (req, res) => {
-//   const { apiKey } = req.params;
 
-//   if(!apiKey) {
-//     sendErrorResponse(res, 400, "Invalid API Key");
-//     return;
-//   }
-
-//   const widgetScript = path.resolve(__dirname, "public/chatWidget.bundle.js");
-
-//   fs.readFile(widgetScript, "utf8", (err, data) => {
-//     if (err) {
-//       sendErrorResponse(res, 500, "Error loading widget script");
-//       return;
-//     }
-
-//     // Inject the API Key into the script by wrapping the script in a custom function or variable
-//     const scriptWithApiKey = `
-//       const apiKey = "${apiKey}"; // Injected API Key
-//       ${data}  // Original script content
-//     `;
-
-//     res.set("Content-Type", "application/javascript");
-//     res.send(scriptWithApiKey);
-//   });
-// });
 app.use("/api/business-service", businessRouter);
 app.use("/api/widget-service", widgetRouter);
 app.use("/api/messages-service", messageRouter);
 app.use("/api/trigger-service", triggerRouter);
+app.use("/api/session-service", sessionRouter);
 
 (async () => {
   // const server = await registerRoutes(app);

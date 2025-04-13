@@ -29,32 +29,26 @@ import {
 } from "@/components/ui/dropdown-menu";
 import { useSendMessage } from "@/hooks/useSendMessage";
 import { useAuth } from "@/context/auth";
+import { generateInitials } from "@/lib/utils";
 
 interface ChatPanelProps {
   activeChat: Chat | null;
   onUserDetailsClick: () => void;
 }
 
-const getInitials = (name: string) => {
-  return name
-    .split(" ")
-    .map((word) => word[0])
-    .join("")
-    .toUpperCase()
-    .slice(0, 2);
-};
-
 const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
-  const {user} = useAuth()
+  const { user } = useAuth();
   const {
     data: messages,
     isLoading,
     error,
   } = useMessages({
     sid: activeChat?.sid ?? "",
-    sessionId: activeChat?.sessionId.toString() ?? ""
+    sessionId: activeChat?.sessionId.toString() ?? "",
   });
-  const {mutateAsync: sendMessage} = useSendMessage(activeChat?.sessionId.toString() ?? "")
+  const { mutateAsync: sendMessage } = useSendMessage(
+    activeChat?.sessionId.toString() ?? ""
+  );
 
   const [newMessage, setNewMessage] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
@@ -94,27 +88,27 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
   ) => {
     if (!user || !activeChat) return;
     if (type === "text" && !content.trim()) return;
-  
+
     const formData = new FormData();
-    
+
     // Add required fields
     formData.append("businessId", user.businessId.toString());
     formData.append("sessionId", activeChat.sid);
     formData.append("sender", "business");
     formData.append("contentType", type);
-    
+
     // Add optional fields
     if (activeChat.customerEmail) {
       formData.append("customerEmail", activeChat.customerEmail);
     }
-  
+
     // Add content based on type
     if (type === "text") {
       formData.append("content", content);
     } else if (type === "image") {
       if (!mediaUrl) return;
       formData.append("file", mediaUrl);
-    }else if (type === "audio") {
+    } else if (type === "audio") {
       if (!mediaUrl) return;
       formData.append("file", mediaUrl, "audio.webm");
     }
@@ -200,9 +194,8 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
           <div className="flex items-center">
             <div className="relative">
               <Avatar className="w-10 h-10">
-                <AvatarImage src="" alt={activeChat.name} />
                 <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                  {getInitials(activeChat.name)}
+                  {generateInitials(activeChat.name)}
                 </AvatarFallback>
               </Avatar>
             </div>
@@ -390,7 +383,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
     }
     groupedMessages[date].push(message);
   });
-  console.log("groupedMessages : ", groupedMessages)
+  console.log("groupedMessages : ", groupedMessages);
   return (
     <div className="flex-1 flex flex-col bg-gray-50 overflow-hidden">
       <div className="p-4 border-b border-gray-200 bg-white">
@@ -398,7 +391,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
           <div className="relative">
             <Avatar className="w-10 h-10">
               <AvatarFallback className="bg-indigo-100 text-indigo-600">
-                {getInitials(activeChat.name)}
+                {generateInitials(activeChat.name)}
               </AvatarFallback>
             </Avatar>
           </div>
@@ -453,7 +446,7 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
                       <Avatar className="w-8 h-8 mr-2">
                         <AvatarImage src="" alt={activeChat.name} />
                         <AvatarFallback className="bg-indigo-100 text-indigo-600 text-sm">
-                          {getInitials(activeChat.name)}
+                          {generateInitials(activeChat.name)}
                         </AvatarFallback>
                       </Avatar>
                     )}
@@ -461,7 +454,9 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
                       className={`max-w-[75%] w-fit rounded-lg p-3 shadow-sm ${
                         isSender && message.contentType === "text"
                           ? "bg-indigo-500 text-white"
-                          : isCustomer && message.contentType === "text" ? "bg-white text-gray-800" : ""
+                          : isCustomer && message.contentType === "text"
+                          ? "bg-white text-gray-800"
+                          : ""
                       }`}
                     >
                       <MessageContent

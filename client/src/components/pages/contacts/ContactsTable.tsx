@@ -1,26 +1,42 @@
-import { useState } from 'react';
-import { Contact } from '@/data/mockData';
-import { Avatar, AvatarImage, AvatarFallback } from '@/components/ui/avatar';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Plus, Filter, Search } from 'lucide-react';
-import FlagIcon from '@/components/ui/flag-icon';
-import { formatDistanceToNow } from 'date-fns';
+import { useState } from "react";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus, Filter, Search } from "lucide-react";
+import FlagIcon from "@/components/ui/flag-icon";
+import { formatDistanceToNow } from "date-fns";
+import { CustomersData } from "@/lib/api/session";
+import { generateInitials } from "@/lib/utils";
 
 interface ContactsTableProps {
-  contacts: Contact[];
+  contacts?: CustomersData;
 }
 
 const ContactsTable: React.FC<ContactsTableProps> = ({ contacts }) => {
-  const [searchQuery, setSearchQuery] = useState('');
-  
+  const [searchQuery, setSearchQuery] = useState("");
+
+  // Handle the case when contacts is undefined
+  if (!contacts) {
+    return <div>Loading contacts...</div>;
+  }
+
   const filteredContacts = searchQuery.trim()
-    ? contacts.filter(contact => 
-        contact.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        contact.location.city.toLowerCase().includes(searchQuery.toLowerCase())
+    ? contacts.data.filter(
+        (contact) =>
+          contact?.customerEmail
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          contact.geolocationCity
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          contact.geolocationCountry
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase()) ||
+          contact.geolocationRegion
+            ?.toLowerCase()
+            .includes(searchQuery.toLowerCase())
       )
-    : contacts;
+    : contacts.data;
 
   return (
     <div className="flex-1 overflow-hidden flex flex-col h-full">
@@ -50,27 +66,45 @@ const ContactsTable: React.FC<ContactsTableProps> = ({ contacts }) => {
           </div>
         </div>
       </div>
-      
+
       <div className="flex-1 overflow-x-auto">
         <table className="min-w-full divide-y divide-gray-200">
           <thead className="bg-gray-50">
             <tr>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Full Name
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Email
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Location
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Segments
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Last Active
               </th>
-              <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+              <th
+                scope="col"
+                className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+              >
                 Score
               </th>
               <th scope="col" className="relative px-6 py-3">
@@ -86,35 +120,53 @@ const ContactsTable: React.FC<ContactsTableProps> = ({ contacts }) => {
                     <div className="flex items-center">
                       <div className="flex-shrink-0 h-10 w-10">
                         <Avatar className="h-10 w-10">
-                          <AvatarImage src={contact.avatar} alt={contact.name} />
-                          <AvatarFallback>{contact.name.charAt(0)}</AvatarFallback>
+                          <AvatarFallback className="bg-indigo-100 text-indigo-600">
+                            {generateInitials(contact.name || "Unknown")}
+                          </AvatarFallback>
                         </Avatar>
                       </div>
                       <div className="ml-4">
-                        <div className="text-sm font-medium text-gray-900">{contact.name}</div>
+                        <div className="text-sm font-medium text-gray-900">
+                          {contact.name || "Unknown"}
+                        </div>
                       </div>
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{contact.email}</div>
-                  </td>
-                  <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex items-center">
-                      <FlagIcon countryCode={contact.location.countryCode} className="mr-2" />
-                      <div className="text-sm text-gray-900">{contact.location.city}, {contact.location.country}</div>
+                    <div className="text-sm text-gray-900">
+                      {contact.customerEmail || "No email"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    {contact.segments.map((segment, index) => (
-                      <span 
+                    <div className="flex items-center">
+                      <FlagIcon
+                        countryCode={contact.geolocationCountryCode ?? ""}
+                        className="mr-2"
+                      />
+                      <div className="text-sm text-gray-900">
+                        {contact.geolocationCity || "Unknown"},{" "}
+                        {contact.geolocationCountry || "Unknown"}
+                      </div>
+                    </div>
+                  </td>
+                  <td className="px-6 py-4 whitespace-nowrap">
+                    {(contact.segments || []).map((segment, index) => (
+                      <span
                         key={index}
-                        className={`${index > 0 ? 'ml-1' : ''} px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                          segment === 'Design' ? 'bg-green-100 text-green-800' :
-                          segment === 'Product' ? 'bg-blue-100 text-blue-800' :
-                          segment === 'Marketing' ? 'bg-purple-100 text-purple-800' :
-                          segment === 'Sales' ? 'bg-red-100 text-red-800' :
-                          segment === 'Support' ? 'bg-gray-100 text-gray-800' :
-                          'bg-yellow-100 text-yellow-800'
+                        className={`${
+                          index > 0 ? "ml-1" : ""
+                        } px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
+                          segment === "Design"
+                            ? "bg-green-100 text-green-800"
+                            : segment === "Product"
+                            ? "bg-blue-100 text-blue-800"
+                            : segment === "Marketing"
+                            ? "bg-purple-100 text-purple-800"
+                            : segment === "Sales"
+                            ? "bg-red-100 text-red-800"
+                            : segment === "Support"
+                            ? "bg-gray-100 text-gray-800"
+                            : "bg-yellow-100 text-yellow-800"
                         }`}
                       >
                         {segment}
@@ -122,26 +174,23 @@ const ContactsTable: React.FC<ContactsTableProps> = ({ contacts }) => {
                     ))}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                    {formatDistanceToNow(new Date(contact.lastActive), { addSuffix: true })}
+                    {formatDistanceToNow(
+                      new Date(contact.lastActive ?? new Date()),
+                      {
+                        addSuffix: true,
+                      }
+                    )}
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="flex text-yellow-400">
-                      {Array.from({ length: 5 }).map((_, index) => (
-                        <svg 
-                          key={index} 
-                          xmlns="http://www.w3.org/2000/svg" 
-                          viewBox="0 0 24 24" 
-                          fill={index < contact.score ? 'currentColor' : 'none'} 
-                          stroke={index < contact.score ? 'none' : 'currentColor'}
-                          className="w-4 h-4"
-                        >
-                          <path d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.562.562 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-                        </svg>
-                      ))}
+                    <div className="text-sm text-gray-900">
+                      {contact.ratings !== null ? contact.ratings : "N/A"}
                     </div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
-                    <Button variant="link" className="text-indigo-500 hover:text-indigo-900">
+                    <Button
+                      variant="link"
+                      className="text-indigo-500 hover:text-indigo-900"
+                    >
                       Edit
                     </Button>
                   </td>
@@ -149,7 +198,10 @@ const ContactsTable: React.FC<ContactsTableProps> = ({ contacts }) => {
               ))
             ) : (
               <tr>
-                <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
+                <td
+                  colSpan={7}
+                  className="px-6 py-10 text-center text-gray-500"
+                >
                   No contacts found
                 </td>
               </tr>
