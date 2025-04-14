@@ -7,7 +7,7 @@ const createMulterUploader = () => {
   const storage = multer.diskStorage({
     destination: (req, file, cb) => {
       console.log("MULTER PATH", path.resolve(ROOT_DIR, "public"));
-      cb(null, path.resolve(ROOT_DIR, "../public"));
+      cb(null, path.resolve(ROOT_DIR, "public"));
     },
     filename: (req, file, cb) => {
       // console.log(file);

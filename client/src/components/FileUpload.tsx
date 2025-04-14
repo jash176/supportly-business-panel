@@ -1,4 +1,4 @@
-import { useRef, useState, ChangeEvent } from "react";
+import { useRef, useState, ChangeEvent, MouseEvent } from "react";
 import { Button } from "./ui/button";
 import { Share } from "lucide-react";
 
@@ -14,7 +14,9 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
-  const handleClick = () => {
+  const handleClick = (e: any) => {
+    e.preventDefault(); // Prevent any default button behavior
+    e.stopPropagation(); // Stop event bubbling
     if (inputRef.current) {
       inputRef.current.value = ""; // Allow same file to be re-selected
       inputRef.current.click();
@@ -66,6 +68,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
         onChange={handleInputChange}
         accept={accept}
         className="hidden"
+        onClick={(e) => e.stopPropagation()} // Prevent click event bubbling
       />
       <Button
         variant="ghost"
