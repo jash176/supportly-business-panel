@@ -18,8 +18,9 @@ import { useWorkspace } from "@/context/WorkspaceContext";
 const Inbox: React.FC = () => {
   const queryClient = useQueryClient();
   const socket = useSocket();
-  const {setWorkspaceData} = useWorkspace()
-  const {data: workspaceInfo, isLoading: isWorkspaceInfoLoading} = useWorkspaceInformation();
+  const { setWorkspaceData } = useWorkspace();
+  const { data: workspaceInfo, isLoading: isWorkspaceInfoLoading } =
+    useWorkspaceInformation();
   const { data: inbox, isLoading, error } = useChats();
   const [activeChat, setActiveChat] = useState(
     inbox && inbox.data ? inbox.data[0] : null
@@ -31,7 +32,13 @@ const Inbox: React.FC = () => {
   );
 
   useEffect(() => {
-    document.title = "Inbox";
+    document.title = "Inbox | Supportly";
+
+    // Set workspace data if available
+    if (workspaceInfo && workspaceInfo.data) {
+      setWorkspaceData(workspaceInfo.data);
+    }
+
     // Listen for new messages
     socket.on("receiveMessage", (message: Message) => {
       console.log("Messages : ", message);
@@ -94,12 +101,12 @@ const Inbox: React.FC = () => {
     return () => {
       socket.off("receiveMessage");
     };
-  }, [queryClient]);
+  }, [queryClient, workspaceInfo, setWorkspaceData]);
   useEffect(() => {
-    if(workspaceInfo && workspaceInfo.data) {
-      setWorkspaceData(workspaceInfo.data)
-    }
-  }, [workspaceInfo])
+    if (!activeChat) document.title = "Inbox | Supportly";
+    else
+      document.title = `${activeChat?.name} | Supportly` || "Inbox | Supportly"; // Set the title to the chat title or a default value if no chat is selected
+  }, [activeChat]);
 
   const togglePanel = () => {
     setIsVisible(!isVisible);
