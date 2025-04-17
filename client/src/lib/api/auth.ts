@@ -32,6 +32,9 @@ export interface LoginResponse {
 }
 
 export interface RegisterResponse {
+  success: boolean;
+  message: string;
+  status: number;
   data: {
     token: string;
     business: {
