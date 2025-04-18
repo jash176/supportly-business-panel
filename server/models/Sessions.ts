@@ -36,7 +36,7 @@ class Session
 {
   public id!: number;
   public businessId!: number;
-  public name!: string | null;
+  public name!: string;
   public customerEmail!: string | null;
   public sid!: string;
   public assignedAgentId!: number | null;

@@ -5,7 +5,7 @@ import {
   sendSuccessResponse,
 } from "../utils/responseHandler";
 import { Op } from "sequelize";
-import { onlineUsers } from "server/config/socket";
+import { onlineUsers } from "../config/socket";
 // Get all sessions for a business
 export const getBusinessSessions = async (req: Request, res: Response) => {
   try {
