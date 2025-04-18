@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useMarkMessagesAsRead } from "@/hooks/useMarkMessagesAsRead";
 import {
   Smile,
   Send,
@@ -49,9 +50,13 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
   const { mutateAsync: sendMessage } = useSendMessage(
     activeChat?.sessionId.toString() ?? ""
   );
+  const { mutate: markAsRead } = useMarkMessagesAsRead(
+    activeChat?.sessionId.toString() ?? ""
+  );
 
   const [newMessage, setNewMessage] = useState("");
   const messageEndRef = useRef<HTMLDivElement>(null);
+  const [hasMarkedAsRead, setHasMarkedAsRead] = useState(false);
 
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const isSmallScreen = useMediaQuery("(max-width: 640px)");
@@ -74,12 +79,30 @@ const ChatPanel: React.FC<ChatPanelProps> = ({ activeChat }) => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const [selectedFile, setSelectedFile] = useState<File | Blob | null>(null);
 
-  console.log("Selected File : ", selectedFile);
-
   // Scroll to bottom of messages whenever messages change
   useEffect(() => {
     messageEndRef.current?.scrollIntoView({ behavior: "instant" });
   }, [messages]);
+
+  // Mark messages as read when they're loaded
+  useEffect(() => {
+    if (messages?.data && activeChat && !hasMarkedAsRead) {
+      const unreadMessageIds = messages.data
+        .filter((msg) => !msg.isRead && msg.sender === "customer")
+        .map((msg) => msg.id)
+        .join(",");
+
+      if (unreadMessageIds) {
+        markAsRead(unreadMessageIds);
+        setHasMarkedAsRead(true);
+      }
+    }
+  }, [messages, activeChat, markAsRead, hasMarkedAsRead]);
+
+  // Reset the hasMarkedAsRead flag when activeChat changes
+  useEffect(() => {
+    setHasMarkedAsRead(false);
+  }, [activeChat?.sessionId]);
 
   const handleSendMessage = async (
     content: string,

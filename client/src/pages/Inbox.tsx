@@ -41,7 +41,6 @@ const Inbox: React.FC = () => {
 
     // Listen for new messages
     socket.on("receiveMessage", (message: Message) => {
-      console.log("Messages : ", message);
       // Update messages for the specific chat
       queryClient.setQueryData<{ data: Message[] }>(
         [`/messages-service/fetch-message-email/${message.sessionId}`],
@@ -63,15 +62,20 @@ const Inbox: React.FC = () => {
         const updatedChats = old.data.map((chat) => {
           if (chat.sessionId === message.sessionId) {
             chatFound = true;
-            console.log("new Date().toISOString() L ", {
-              ...chat,
-              lastMessage: message.content, // ✅ Update lastMessage
-              lastMessageTime: new Date().toISOString(), // ✅ Ensure lastMessageTime updates
-            });
+            // Check if this is the active chat
+            const isActiveChat = activeChat?.sessionId === chat.sessionId;
+
+            // If it's not the active chat and the message is from customer, increment unread count
+            const shouldIncrementUnread =
+              !isActiveChat && message.sender === "customer";
+
             return {
               ...chat,
-              lastMessage: message.content, // ✅ Update lastMessage
-              lastMessageTime: new Date().toISOString(), // ✅ Ensure lastMessageTime updates
+              lastMessage: message.content, // Update lastMessage
+              lastMessageTime: new Date().toISOString(), // Ensure lastMessageTime updates
+              unreadMessages: shouldIncrementUnread
+                ? (chat.unreadMessages || 0) + 1
+                : chat.unreadMessages || 0,
             };
           }
           return chat;
@@ -83,17 +87,19 @@ const Inbox: React.FC = () => {
             sessionId: message.sessionId,
             lastMessage: message.content,
             lastMessageTime: new Date().toISOString(),
+            // If new chat and message is from customer, set unread count to 1
+            unreadMessages: message.sender === "customer" ? 1 : 0,
           });
         }
 
-        // ✅ Sort chats based on `lastMessageTime`
+        // Sort chats based on `lastMessageTime`
         updatedChats.sort(
           (a, b) =>
             new Date(b.lastMessageTime).getTime() -
             new Date(a.lastMessageTime).getTime()
         );
 
-        return { data: [...updatedChats] }; // ✅ New reference to trigger re-render
+        return { data: [...updatedChats] }; // New reference to trigger re-render
       });
     });
 
@@ -113,13 +119,13 @@ const Inbox: React.FC = () => {
   };
 
   const handleChatSelect = (chat: Chat) => {
+    console.log("Chat selected:", chat); // Add this log t
     setActiveChat(chat);
 
     // Get unread messages for this chat
     const messages = queryClient.getQueryData<{ data: Message[] }>([
       `/messages-service/fetch-message-email/${chat.sessionId}`,
     ]);
-    console.log("Messages : ", messages);
     if (messages?.data) {
       const unreadMessageIds = messages.data
         .filter((msg) => !msg.isRead)
