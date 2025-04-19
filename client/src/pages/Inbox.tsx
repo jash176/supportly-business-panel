@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import ChatsPanel from "@/components/pages/inbox/ChatsPanel";
 import ChatPanel from "@/components/pages/inbox/ChatPanel";
 import DetailsPanel from "@/components/pages/inbox/DetailsPanel";
@@ -14,7 +14,8 @@ import { useMarkMessagesAsRead } from "@/hooks/useMarkMessagesAsRead";
 import { Chat } from "@/lib/api/inbox";
 import { useWorkspaceInformation } from "@/hooks/useWorkspaceInformation";
 import { useWorkspace } from "@/context/WorkspaceContext";
-
+import notificationPopSound from "../assets/notification_pop.wav"
+import { usePageFocus } from "@/hooks/usePageFocus";
 const Inbox: React.FC = () => {
   const queryClient = useQueryClient();
   const socket = useSocket();
@@ -22,6 +23,7 @@ const Inbox: React.FC = () => {
   const { data: workspaceInfo, isLoading: isWorkspaceInfoLoading } =
     useWorkspaceInformation();
   const { data: inbox, isLoading, error } = useChats();
+  const isFocused = usePageFocus();
   const [activeChat, setActiveChat] = useState(
     inbox && inbox.data ? inbox.data[0] : null
   );
@@ -30,6 +32,12 @@ const Inbox: React.FC = () => {
   const { mutate: markAsRead } = useMarkMessagesAsRead(
     activeChat?.sessionId.toString() ?? ""
   );
+
+  const notificationSound = useRef<HTMLAudioElement>(new Audio(notificationPopSound));
+
+  useEffect(() => {
+    notificationSound.current.load();
+  }, [])
 
   useEffect(() => {
     document.title = "Inbox | Supportly";
@@ -41,6 +49,9 @@ const Inbox: React.FC = () => {
 
     // Listen for new messages
     socket.on("receiveMessage", (message: Message) => {
+      if(!isFocused) {
+        notificationSound.current.play();
+      }
       // Update messages for the specific chat
       queryClient.setQueryData<{ data: Message[] }>(
         [`/messages-service/fetch-message-email/${message.sessionId}`],

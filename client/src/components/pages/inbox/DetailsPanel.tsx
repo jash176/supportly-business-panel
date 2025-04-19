@@ -1,5 +1,13 @@
 import { useState } from "react";
-import { Mail, Phone, Video, X, UserPlus } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  Video,
+  X,
+  UserPlus,
+  ChevronDown,
+  ChevronUp,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +27,11 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({
   isVisible,
   togglePanel,
 }) => {
+  const [isInfoExpanded, setIsInfoExpanded] = useState(false);
+  const [isVisitorsDevicesExpanded, setIsVisitorsDevicesExpanded] =
+    useState(false);
+  const [isSegmentsExpanded, setIsSegmentsExpanded] = useState(false);
+
   if (!activeChat) {
     return null;
   }
@@ -27,16 +40,6 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({
 
   return (
     <>
-      {/* Mobile show button */}
-      {/* <div className="lg:hidden fixed bottom-4 right-4 z-10">
-        <Button 
-          onClick={togglePanel}
-          className="rounded-full bg-indigo-600 text-white shadow-lg p-3 h-12 w-12"
-        >
-          <UserPlus className="h-5 w-5" />
-        </Button>
-      </div> */}
-
       {/* Panel content */}
       <div
         className={`
@@ -64,92 +67,94 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({
             </AvatarFallback>
           </Avatar>
           <h3 className="font-semibold text-lg text-gray-900">{person.name}</h3>
-          {/* <p className="text-sm text-gray-500">{person.role}</p> */}
-
-          {/* <div className="flex justify-center mt-4 space-x-2">
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="p-2 text-indigo-500 border border-indigo-500 rounded-full hover:bg-indigo-500 hover:text-white"
-            >
-              <Mail className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="p-2 text-indigo-500 border border-indigo-500 rounded-full hover:bg-indigo-500 hover:text-white"
-            >
-              <Phone className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="outline" 
-              size="icon" 
-              className="p-2 text-indigo-500 border border-indigo-500 rounded-full hover:bg-indigo-500 hover:text-white"
-            >
-              <Video className="h-5 w-5" />
-            </Button>
-          </div> */}
         </div>
 
         {activeChat.metadata && (
-          <div className="p-6 overflow-y-auto">
-            <h4 className="font-semibold text-gray-800 mb-4">
-              User Information
-            </h4>
+          <div className="overflow-y-auto">
+            <button
+              onClick={() => setIsInfoExpanded(!isInfoExpanded)}
+              className="flex justify-between items-center w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 transition-colors"
+            >
+              <h4 className="font-semibold text-gray-800 text-xs ">User Information</h4>
+              {isInfoExpanded ? (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
 
-            <div className="space-y-4">
-              <div>
-                <p className="text-sm text-gray-500">Email</p>
-                <p className="text-sm text-gray-900">
-                  {activeChat?.customerEmail || "unknown"}
-                </p>
-              </div>
-
-              <div>
-                <p className="text-sm text-gray-500">Location</p>
-                <div className="flex items-center ">
-                  {activeChat.metadata.geolocation?.countryCode &&
-                    activeChat.metadata.geolocation?.countryCode !==
-                      "unknwon" && (
-                      <FlagIcon
-                        countryCode={
-                          activeChat.metadata.geolocation?.countryCode
-                        }
-                        className="mr-2"
-                      />
-                    )}
+            {isInfoExpanded && (
+              <div className="space-y-4 p-4 border-t">
+                <div>
+                  <p className="text-sm text-gray-500">Email</p>
                   <p className="text-sm text-gray-900">
-                    {activeChat.metadata.geolocation?.city},{" "}
-                    {activeChat.metadata.geolocation?.country}
+                    {activeChat?.customerEmail || "unknown"}
+                  </p>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">Location</p>
+                  <div className="flex items-center ">
+                    {activeChat.metadata.geolocation?.countryCode &&
+                      activeChat.metadata.geolocation?.countryCode !==
+                        "unknwon" && (
+                        <FlagIcon
+                          countryCode={
+                            activeChat.metadata.geolocation?.countryCode
+                          }
+                          className="mr-2"
+                        />
+                      )}
+                    <p className="text-sm text-gray-900">
+                      {activeChat.metadata.geolocation?.city},{" "}
+                      {activeChat.metadata.geolocation?.country}
+                    </p>
+                  </div>
+                </div>
+
+                <div>
+                  <p className="text-sm text-gray-500">Last Activity</p>
+                  <p className="text-sm text-gray-900">
+                    {formatRelative(
+                      new Date(activeChat.lastMessageTime),
+                      new Date()
+                    )}
                   </p>
                 </div>
               </div>
+            )}
 
-              {/* <div>
-              <p className="text-sm text-gray-500">Local Time</p>
-              <p className="text-sm text-gray-900">{person.localTime}</p>
-            </div> */}
+            <button
+              onClick={() =>
+                setIsVisitorsDevicesExpanded(!isVisitorsDevicesExpanded)
+              }
+              className="flex justify-between items-center w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 transition-colors text-xs border-t"
+            >
+              <h4 className="font-semibold text-gray-800">Visitors Device</h4>
+              {isVisitorsDevicesExpanded ? (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
+            {isVisitorsDevicesExpanded && (
+              <div className="space-y-4 p-4 border-t">
 
-              <div>
-                <p className="text-sm text-gray-500">Last Activity</p>
-                <p className="text-sm text-gray-900">
-                  {formatRelative(
-                    new Date(activeChat.lastMessageTime),
-                    new Date()
-                  )}
-                </p>
+                <div>
+                  <div className="flex items-center ">
+                    {activeChat.metadata?.system?.browserName &&
+                      activeChat.metadata.system?.browserName !==
+                        "unknwon" && (
+                        <img src={`https://cdnjs.cloudflare.com/ajax/libs/browser-logos/75.0.1/${activeChat.metadata.system?.browserName.toLowerCase()}/${activeChat.metadata.system?.browserName.toLowerCase()}_24x24.png`} />
+                      )}
+                    <p className="text-sm text-gray-900 ml-3">
+                      {activeChat.metadata.system?.browserName}{" "}
+                      {activeChat.metadata.system?.browserVersion} on {" "} {activeChat.metadata.system?.osName}
+                    </p>
+                  </div>
+                </div>
               </div>
-            </div>
-
-            {/* <div className="mt-6">
-            <h4 className="font-semibold text-gray-800 mb-4">Notes</h4>
-            <Textarea
-              rows={3}
-              placeholder="Add notes about this contact..."
-              className="w-full p-3 bg-gray-100 rounded-md resize-none"
-              defaultValue={person.notes || ""}
-            />
-          </div> */}
+            )}
           </div>
         )}
       </div>
