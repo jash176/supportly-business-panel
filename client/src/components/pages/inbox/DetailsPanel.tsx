@@ -15,6 +15,7 @@ import FlagIcon from "@/components/ui/flag-icon";
 import { formatRelative } from "date-fns";
 import { Chat } from "@/lib/api/inbox";
 import { generateInitials } from "@/lib/utils";
+import SessionSegments from "./SessionSegments";
 
 interface DetailsPanelProps {
   activeChat: Chat | null;
@@ -157,6 +158,25 @@ const DetailsPanel: React.FC<DetailsPanelProps> = ({
             )}
           </div>
         )}
+          <div className="">
+
+            <button
+              onClick={() =>
+                setIsSegmentsExpanded(!isSegmentsExpanded)
+              }
+              className="flex justify-between items-center w-full py-2 px-3 bg-gray-50 hover:bg-gray-100 transition-colors text-xs border-t"
+            >
+              <h4 className="font-semibold text-gray-800">Segments for conversation</h4>
+              {isSegmentsExpanded ? (
+                <ChevronUp className="h-4 w-4 text-gray-500" />
+              ) : (
+                <ChevronDown className="h-4 w-4 text-gray-500" />
+              )}
+            </button>
+            {isSegmentsExpanded && (
+              <SessionSegments sessionId={activeChat.sessionId} defaultSegments={JSON.parse(activeChat.metadata.segments)} />
+            )}
+          </div>
       </div>
     </>
   );

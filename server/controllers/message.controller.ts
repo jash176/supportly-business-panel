@@ -139,6 +139,8 @@ export const fetchConversations = async (req: Request, res: Response) => {
         "browserName",
         "browserVersion",
         "userAgent",
+        "notes",
+        "segments"
       ],
     });
 
@@ -194,6 +196,8 @@ export const fetchConversations = async (req: Request, res: Response) => {
             browserVersion: session.browserVersion,
             userAgent: session.userAgent,
           },
+          notes: session.notes,
+          segments: session.segments
         },
       });
     });

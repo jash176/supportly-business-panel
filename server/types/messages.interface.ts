@@ -17,4 +17,6 @@ interface SessionMetadata {
     browserVersion?: string;
     userAgent?: string;
   };
+  notes: string;
+  segments: string;
 }

@@ -196,3 +196,29 @@ export const getActiveVisitors = async (req: Request, res: Response) => {
     return;
   }
 };
+
+export const updateMeta = async (req: Request, res: Response) => {
+  try {
+    const { sessionId, segments, notes } = req.body;
+    const business = req.business;
+    if (!business) {
+      sendErrorResponse(res, 401, "Unauthorized");
+      return;
+    }
+    const businessId = business.id;
+    const session = await Session.findOne({where: {id: sessionId, businessId}});
+    if(!session) {
+      sendErrorResponse(res, 400, "Session not found");
+      return;
+    }
+    const updates: any = {};
+    if (segments !== undefined) updates.segments = segments;
+    if (notes !== undefined) updates.notes = notes;
+    const newSession = await session.update(updates)
+    sendSuccessResponse(res, 201, "Session meta updated", newSession)
+  }catch(error) {
+    console.error("Error updating meta:", error);
+    sendErrorResponse(res, 500, "Failed to updating meta");
+    return;
+  }
+}

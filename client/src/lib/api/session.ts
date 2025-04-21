@@ -7,6 +7,12 @@ export interface CustomersData {
   data: SessionAttributes[];
 }
 
+export interface SessionMetaData {
+  sessionId: number;
+  notes?: string;
+  segments?: Array<string>;
+}
+
 export const sessionApi = {
   fetchCustomers: async (): Promise<CustomersData> => {
     const response = await apiRequest("GET", "/session-service/getContacts");
@@ -16,4 +22,8 @@ export const sessionApi = {
     const response = await apiRequest("GET", "/session-service/active-users");
     return response.json();
   },
+  updateMeta: async (data: SessionMetaData) => {
+    const response = await apiRequest("POST", "/session-service/meta", data);
+    return response.json();
+  }
 };
